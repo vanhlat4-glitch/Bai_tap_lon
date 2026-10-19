@@ -1,0 +1,14 @@
+node_modules/
+.env
+uploads/*
+!uploads/.gitkeep
+server/uploads/*
+!server/uploads/.gitkeep
+data/
+server/data/
+*.db
+*.sqlite
+.DS_Store
+Thumbs.db
+frontend/dist/
+frontend/node_modules/

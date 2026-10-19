@@ -1,0 +1,179 @@
+{
+  "info": {
+    "_postman_id": "a9b1c2d3-e4f5-4a6b-8c7d-9e0f1a2b3c4d",
+    "name": "Minigame Hub API Collection",
+    "description": "Full collection of APIs for Minigame Hub (Full-stack Final Project with Refresh Token, Roles, Games, Shop, Uploads)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"gamer_test\",\n  \"email\": \"gamer@example.com\",\n  \"password\": \"123456\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"] }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/refresh-token", "host": ["{{baseUrl}}"], "path": ["api", "auth", "refresh-token"] }
+          }
+        },
+        {
+          "name": "Get Profile (Me)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/auth/me", "host": ["{{baseUrl}}"], "path": ["api", "auth", "me"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Upload Avatar",
+      "item": [
+        {
+          "name": "Upload Avatar (Multer)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [{ "key": "avatar", "type": "file", "src": "" }]
+            },
+            "url": { "raw": "{{baseUrl}}/api/upload/avatar", "host": ["{{baseUrl}}"], "path": ["api", "upload", "avatar"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Games & Scores",
+      "item": [
+        {
+          "name": "Submit Score",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gameType\": \"snake\",\n  \"score\": 350,\n  \"coinsEarned\": 35\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/games/score", "host": ["{{baseUrl}}"], "path": ["api", "games", "score"] }
+          }
+        },
+        {
+          "name": "Get Leaderboard",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/games/leaderboard?game=snake&limit=10", "host": ["{{baseUrl}}"], "path": ["api", "games", "leaderboard"], "query": [{ "key": "game", "value": "snake" }, { "key": "limit", "value": "10" }] }
+          }
+        },
+        {
+          "name": "Spin Lucky Wheel",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/wheel/spin", "host": ["{{baseUrl}}"], "path": ["api", "wheel", "spin"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Shop & Inventory",
+      "item": [
+        {
+          "name": "Get Shop Items",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/shop/items", "host": ["{{baseUrl}}"], "path": ["api", "shop", "items"] }
+          }
+        },
+        {
+          "name": "Buy Item",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"itemId\": \"item_cyber_sword\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/shop/buy", "host": ["{{baseUrl}}"], "path": ["api", "shop", "buy"] }
+          }
+        },
+        {
+          "name": "Get My Inventory",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/shop/inventory", "host": ["{{baseUrl}}"], "path": ["api", "shop", "inventory"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Admin Management",
+      "item": [
+        {
+          "name": "Get All Users (Pagination + Search)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/users?page=1&limit=10&search=gamer", "host": ["{{baseUrl}}"], "path": ["api", "users"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }, { "key": "search", "value": "gamer" }] }
+          }
+        },
+        {
+          "name": "Update User Role / Coins",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"admin\",\n  \"coins\": 5000\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/users/USER_ID_HERE", "host": ["{{baseUrl}}"], "path": ["api", "users", "USER_ID_HERE"] }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "accessToken", "value": "" },
+    { "key": "refreshToken", "value": "" }
+  ]
+}

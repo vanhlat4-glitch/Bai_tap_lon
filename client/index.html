@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cyber Minigame Hub - Cổng Game Trực Tuyến & Bảng Xếp Hạng</title>
+  <meta name="description" content="Cổng Minigame giải trí đa năng: Cờ Caro AI, Cyber Snake, 2048 Neon, Vòng Quay May Mắn, Bảng Xếp Hạng và Cửa Hàng Xu.">
+  
+  <!-- Modern Typography from Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Ambient Glow Background Canvas Elements -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+
+  <!-- Main Navigation Header -->
+  <header class="app-header">
+    <div class="container header-inner">
+      <div class="logo-area" onclick="switchView('home')">
+        <div class="logo-icon">🎮</div>
+        <div class="logo-text">
+          <span class="logo-title">CYBER<span class="highlight">GAMES</span></span>
+          <span class="logo-subtitle">PORTAL & HUB</span>
+        </div>
+      </div>
+
+      <nav class="main-nav">
+        <a href="#" class="nav-link active" data-target="home">🏠 <span class="nav-text">Trang chủ</span></a>
+        <a href="#" class="nav-link" data-target="games">🎯 <span class="nav-text">Trò chơi</span></a>
+        <a href="#" class="nav-link" data-target="wheel">🎡 <span class="nav-text">Vòng quay</span></a>
+        <a href="#" class="nav-link" data-target="leaderboard">🏆 <span class="nav-text">Xếp hạng</span></a>
+        <a href="#" class="nav-link" data-target="shop">🛒 <span class="nav-text">Cửa hàng</span></a>
+        <a href="#" id="adminNavLink" class="nav-link hidden" data-target="admin">⚙️ <span class="nav-text">Quản trị</span></a>
+      </nav>
+
+      <div class="header-actions">
+        <!-- Sound Toggle Button -->
+        <button id="soundToggleBtn" class="btn btn-icon" title="Bật/Tắt âm thanh">
+          🔊 <span class="nav-text">Âm thanh</span>
+        </button>
+
+        <!-- Guest Actions -->
+        <div id="guestNav" class="auth-buttons">
+          <button id="openLoginBtn" class="btn btn-outline btn-sm">Đăng nhập</button>
+          <button id="openRegisterBtn" class="btn btn-primary btn-sm">Đăng ký</button>
+        </div>
+
+        <!-- Logged-in User Profile Pill -->
+        <div id="userNav" class="user-pill hidden">
+          <div class="user-coin-badge">
+            <span class="coin-icon">💰</span>
+            <span id="userCoinsVal" class="coin-val">100</span>
+          </div>
+          <div class="user-info-badge">
+            <span id="userAvatarDisplay" class="user-avatar-icon">🎮</span>
+            <div class="user-text-info">
+              <span id="userNameDisplay" class="user-name">Player</span>
+              <span id="userBadgeDisplay" class="user-badge">Tân thủ</span>
+            </div>
+          </div>
+          <button id="openUploadBtn" class="btn btn-ghost btn-sm" title="Tải ảnh đại diện (Lesson 10)">📷</button>
+          <button id="logoutBtn" class="btn btn-ghost btn-sm" title="Đăng xuất">🚪</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Views -->
+  <main class="app-main container">
+
+    <!-- ==================== VIEW 1: HOME ==================== -->
+    <section id="view-home" class="app-view">
+      <!-- Hero Banner -->
+      <div class="hero-card">
+        <div class="hero-content">
+          <div class="hero-badge">⚡ NỀN TẢNG MINIGAME FULL-STACK HIỆN ĐẠI</div>
+          <h1 class="hero-title">Đấu Trí, Săn Điểm & <br><span class="gradient-text">Leo Bảng Xếp Hạng</span></h1>
+          <p class="hero-desc">
+            Trải nghiệm 4 trò chơi kinh điển với công nghệ đồ họa mượt mà, hệ thống tính điểm thời gian thực,
+            tích lũy Xu ảo và mở khóa các danh hiệu độc quyền!
+          </p>
+          <div class="hero-cta-group">
+            <button class="btn btn-primary btn-lg" onclick="switchView('games')">🎮 Chơi Ngay Bây Giờ</button>
+            <button class="btn btn-secondary btn-lg" onclick="switchView('wheel')">🎡 Vòng Quay May Mắn</button>
+            <button class="btn btn-outline btn-lg" onclick="switchView('leaderboard')">🏆 Xem Bảng Xếp Hạng</button>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="hero-game-badge badge-caro">⭕❌ Gomoku Caro</div>
+          <div class="hero-game-badge badge-snake">🐍 Cyber Snake</div>
+          <div class="hero-game-badge badge-2048">🔢 Neon 2048</div>
+          <div class="hero-game-badge badge-wheel">🎡 Lucky Wheel</div>
+          <div class="hero-orb"></div>
+        </div>
+      </div>
+
+      <!-- Live Statistics Ribbon -->
+      <div class="stats-ribbon">
+        <div class="stat-box">
+          <div class="stat-icon">👥</div>
+          <div class="stat-info">
+            <div id="statTotalUsers" class="stat-value">---</div>
+            <div class="stat-label">Người Chơi Đã Tham Gia</div>
+          </div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-icon">🎮</div>
+          <div class="stat-info">
+            <div id="statTotalMatches" class="stat-value">---</div>
+            <div class="stat-label">Số Trận Đã Đấu</div>
+          </div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-icon">🐍</div>
+          <div class="stat-info">
+            <div id="statBestSnake" class="stat-value">---</div>
+            <div class="stat-label">Kỷ Lục Rắn Săn Mồi</div>
+          </div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-icon">💎</div>
+          <div class="stat-info">
+            <div id="statBest2048" class="stat-value">---</div>
+            <div class="stat-label">Kỷ Lục Điểm 2048</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Game Cards Grid -->
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Danh Sách Trò Chơi Nổi Bật</h2>
+          <p class="section-subtitle">Chọn minigame yêu thích để bắt đầu hành trình chinh phục điểm số</p>
+        </div>
+      </div>
+
+      <div class="game-cards-grid">
+        <!-- Card 1: Caro -->
+        <div class="game-showcase-card" onclick="switchView('games'); document.querySelector('.game-tab-btn[data-game=caro]').click();">
+          <div class="game-card-icon" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">⭕❌</div>
+          <div class="game-card-content">
+            <div class="game-card-tag">Chiến Thuật Trí Tuệ</div>
+            <h3 class="game-card-title">Cờ Caro Tinh Anh (Gomoku)</h3>
+            <p class="game-card-desc">Thách thức AI thông minh với 3 cấp độ hoặc so tài 2 người trên cùng máy. Tạo chuỗi 5 quân để chiến thắng!</p>
+            <div class="game-card-footer">
+              <span class="game-reward-pill">Thưởng tới +35 Xu/trận</span>
+              <span class="play-link">Chơi ngay →</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Snake -->
+        <div class="game-showcase-card" onclick="switchView('games'); document.querySelector('.game-tab-btn[data-game=snake]').click();">
+          <div class="game-card-icon" style="background: linear-gradient(135deg, #10b981, #047857);">🐍</div>
+          <div class="game-card-content">
+            <div class="game-card-tag">Phản Xạ Cực Nhanh</div>
+            <h3 class="game-card-title">Cyber Snake 2.0</h3>
+            <p class="game-card-desc">Điều khiển rắn neon săn táo thường & táo vàng thần kỳ, hiệu ứng hạt nổ sống động, tăng tốc theo điểm số.</p>
+            <div class="game-card-footer">
+              <span class="game-reward-pill">1 Xu mỗi 10 điểm</span>
+              <span class="play-link">Chơi ngay →</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: 2048 -->
+        <div class="game-showcase-card" onclick="switchView('games'); document.querySelector('.game-tab-btn[data-game=2048]').click();">
+          <div class="game-card-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">🔢</div>
+          <div class="game-card-content">
+            <div class="game-card-tag">Giải Đố Tư Duy</div>
+            <h3 class="game-card-title">Neon 2048</h3>
+            <p class="game-card-desc">Trượt và ghép các ô số tương đồng để tạo nên con số 2048 huyền thoại. Hỗ trợ thao tác vuốt và hoàn tác nước đi.</p>
+            <div class="game-card-footer">
+              <span class="game-reward-pill">Mở khóa 2048: +30 Xu</span>
+              <span class="play-link">Chơi ngay →</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 4: Wheel -->
+        <div class="game-showcase-card" onclick="switchView('wheel');">
+          <div class="game-card-icon" style="background: linear-gradient(135deg, #ec4899, #be185d);">🎡</div>
+          <div class="game-card-content">
+            <div class="game-card-tag">Vận May & Quà Khủng</div>
+            <h3 class="game-card-title">Vòng Quay May Mắn</h3>
+            <p class="game-card-desc">Quay miễn phí mỗi 6 tiếng! Trúng ngay hàng trăm Xu thưởng và danh hiệu hiếm "Vận May Đỏ".</p>
+            <div class="game-card-footer">
+              <span class="game-reward-pill">Jackpot +300 Xu</span>
+              <span class="play-link">Quay ngay →</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Matches Activity Ticker -->
+      <div class="feed-section">
+        <div class="section-header">
+          <div>
+            <h3 class="section-title">⚡ Hoạt Động Thi Đấu Thời Gian Thực</h3>
+            <p class="section-subtitle">Các trận đấu vừa diễn ra trên hệ thống</p>
+          </div>
+        </div>
+        <div id="liveMatchFeed" class="live-feed-grid">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 2: GAMES ARENA ==================== -->
+    <section id="view-games" class="app-view hidden">
+      <!-- Game Selector Tabs -->
+      <div class="game-tabs-nav">
+        <button class="game-tab-btn active" data-game="caro">⭕❌ Cờ Caro Tinh Anh</button>
+        <button class="game-tab-btn" data-game="snake">🐍 Cyber Snake 2.0</button>
+        <button class="game-tab-btn" data-game="2048">🔢 Neon 2048</button>
+      </div>
+
+      <!-- 1. CARO ARENA -->
+      <div id="arena-caro" class="game-arena">
+        <div class="game-arena-layout">
+          <div class="game-main-panel">
+            <div class="caro-board-wrapper">
+              <div id="caroBoard" class="caro-board"></div>
+            </div>
+          </div>
+
+          <div class="game-side-panel">
+            <div class="panel-card">
+              <h3 class="panel-title">🎮 Bảng Điều Khiển Caro</h3>
+
+              <div class="form-group">
+                <label>Chế độ chơi:</label>
+                <select id="caroModeSelect" class="form-select">
+                  <option value="ai">Chơi với AI Máy tính</option>
+                  <option value="pvp">2 Người chơi (PvP Local)</option>
+                </select>
+              </div>
+
+              <div id="caroAiDiffContainer" class="form-group">
+                <label>Độ khó của AI:</label>
+                <select id="caroAiDiff" class="form-select">
+                  <option value="easy">Dễ (Tập sự)</option>
+                  <option value="normal" selected>Vừa (Chiến thuật)</option>
+                  <option value="hard">Cực khó (Bất bại)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Kích thước bàn cờ:</label>
+                <select id="caroSizeSelect" class="form-select">
+                  <option value="15" selected>15 x 15 (Chuẩn Gomoku)</option>
+                  <option value="10">10 x 10 (Nhanh gọn)</option>
+                </select>
+              </div>
+
+              <div class="caro-status-box">
+                <div class="status-label">Trạng thái trận đấu:</div>
+                <div id="caroStatus" class="status-value">Lượt của bạn (Quân X)</div>
+              </div>
+
+              <div class="match-score-tracker">
+                <div class="score-pill score-win">
+                  <span>Thắng:</span>
+                  <strong id="caroScoreWins">0</strong>
+                </div>
+                <div class="score-pill score-loss">
+                  <span>Thua:</span>
+                  <strong id="caroScoreLosses">0</strong>
+                </div>
+              </div>
+
+              <div class="button-group">
+                <button id="caroUndoBtn" class="btn btn-outline btn-block">↩️ Hoàn tác</button>
+                <button id="caroResetBtn" class="btn btn-primary btn-block">🔄 Trận Mới</button>
+              </div>
+
+              <div class="game-rule-note">
+                💡 <strong>Luật chơi:</strong> Đặt 5 quân cờ thẳng hàng (ngang, dọc hoặc chéo) liên tiếp không bị chặn 2 đầu để giành chiến thắng.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. SNAKE ARENA -->
+      <div id="arena-snake" class="game-arena hidden">
+        <div class="game-arena-layout">
+          <div class="game-main-panel">
+            <div class="snake-canvas-wrapper">
+              <canvas id="snakeCanvas" width="400" height="400"></canvas>
+              
+              <!-- Game Over / Pause Overlay -->
+              <div id="snakeOverlay" class="canvas-overlay">
+                <div class="overlay-box">
+                  <h3 id="snakeOverlayTitle" class="overlay-title">Cyber Snake 2.0</h3>
+                  <p id="snakeOverlayMsg" class="overlay-desc">Dùng phím mũi tên hoặc WASD để di chuyển. Nhấn Phím cách để Bắt đầu/Tạm dừng.</p>
+                  <button id="snakeRestartBtn" class="btn btn-primary btn-lg">Bắt Đầu Chơi Ngay</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mobile Touch D-Pad -->
+            <div class="mobile-dpad">
+              <button id="snakeUp" class="dpad-btn dpad-up">▲</button>
+              <div class="dpad-horizontal">
+                <button id="snakeLeft" class="dpad-btn dpad-left">◀</button>
+                <button id="snakeRight" class="dpad-btn dpad-right">▶</button>
+              </div>
+              <button id="snakeDown" class="dpad-btn dpad-down">▼</button>
+            </div>
+          </div>
+
+          <div class="game-side-panel">
+            <div class="panel-card">
+              <h3 class="panel-title">🐍 Điểm Số & Điều Khiển</h3>
+
+              <div class="scores-display-row">
+                <div class="score-card">
+                  <div class="score-label">ĐIỂM HIỆN TẠI</div>
+                  <div id="snakeScore" class="score-number highlight">0</div>
+                </div>
+                <div class="score-card">
+                  <div class="score-label">KỶ LỤC CỦA BẠN</div>
+                  <div id="snakeHighScore" class="score-number">0</div>
+                </div>
+              </div>
+
+              <div class="button-group" style="margin-top: 1.5rem;">
+                <button id="snakeStartBtn" class="btn btn-primary btn-block">Bắt đầu chơi</button>
+              </div>
+
+              <div class="food-legend">
+                <h4>Vật phẩm trong game:</h4>
+                <div class="legend-item">
+                  <span class="legend-dot green"></span>
+                  <span>Táo Xanh: +10 điểm</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-dot gold"></span>
+                  <span>Táo Vàng Thần Kỳ (8s): +35 điểm & gấp đôi Xu</span>
+                </div>
+              </div>
+
+              <div class="game-rule-note">
+                ⌨️ <strong>Phím tắt:</strong> Phím mũi tên (↑ ↓ ← →) hoặc W, A, S, D. Phím Cách (Space) để Tạm dừng/Tiếp tục.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. 2048 ARENA -->
+      <div id="arena-2048" class="game-arena hidden">
+        <div class="game-arena-layout">
+          <div class="game-main-panel">
+            <div class="g2048-board-wrapper">
+              <div id="g2048Board" class="g2048-board"></div>
+
+              <!-- 2048 Overlay -->
+              <div id="g2048Overlay" class="canvas-overlay hidden">
+                <div class="overlay-box">
+                  <h3 id="g2048OverlayTitle" class="overlay-title">Trò Chơi Kết Thúc!</h3>
+                  <p id="g2048OverlayMsg" class="overlay-desc">Bạn có muốn chơi lại không?</p>
+                  <button onclick="window.game2048.reset()" class="btn btn-primary btn-lg">Chơi Ván Mới</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Touch Direction Controls for 2048 -->
+            <div class="mobile-dpad">
+              <button id="g2048Up" class="dpad-btn dpad-up">▲</button>
+              <div class="dpad-horizontal">
+                <button id="g2048Left" class="dpad-btn dpad-left">◀</button>
+                <button id="g2048Right" class="dpad-btn dpad-right">▶</button>
+              </div>
+              <button id="g2048Down" class="dpad-btn dpad-down">▼</button>
+            </div>
+          </div>
+
+          <div class="game-side-panel">
+            <div class="panel-card">
+              <h3 class="panel-title">🔢 Điểm Số & Hoàn Tác</h3>
+
+              <div class="scores-display-row">
+                <div class="score-card">
+                  <div class="score-label">ĐIỂM SỐ</div>
+                  <div id="g2048Score" class="score-number highlight">0</div>
+                </div>
+                <div class="score-card">
+                  <div class="score-label">KỶ LỤC</div>
+                  <div id="g2048Best" class="score-number">0</div>
+                </div>
+              </div>
+
+              <div class="button-group" style="margin-top: 1.5rem;">
+                <button id="g2048UndoBtn" class="btn btn-outline btn-block">↩️ Hoàn Tác Nước Đi</button>
+                <button id="g2048NewGameBtn" class="btn btn-primary btn-block">🔄 Ván Mới</button>
+              </div>
+
+              <div class="game-rule-note">
+                💡 <strong>Mẹo chơi:</strong> Hãy gom các ô số lớn nhất về một góc bàn cờ (ví dụ góc dưới cùng bên phải) để dễ dàng kết hợp và mở rộng chuỗi số!
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 3: LUCKY WHEEL ==================== -->
+    <section id="view-wheel" class="app-view hidden">
+      <div class="section-header text-center">
+        <h2 class="section-title">🎡 Vòng Quay May Mắn</h2>
+        <p class="section-subtitle">Mỗi ngày nhận 1 lượt quay miễn phí để rinh về hàng trăm Xu thưởng và Danh hiệu độc quyền!</p>
+      </div>
+
+      <div class="wheel-center-container">
+        <div class="wheel-box">
+          <canvas id="wheelCanvas" width="380" height="380"></canvas>
+          <button id="wheelSpinBtn" class="btn btn-primary btn-spin">QUAY NGAY</button>
+        </div>
+
+        <div class="wheel-info-card">
+          <div id="wheelCostText" class="wheel-status-pill">Đang kiểm tra lượt quay...</div>
+          <div id="wheelCountdown" class="wheel-countdown-text"></div>
+
+          <div class="wheel-prizes-list">
+            <h4>Danh sách quà tặng trên vòng quay:</h4>
+            <div class="prize-chips-grid">
+              <span class="prize-chip">💥 Jackpot 300 Xu</span>
+              <span class="prize-chip">💎 +100 Xu</span>
+              <span class="prize-chip">🍀 +80 Xu</span>
+              <span class="prize-chip">⚡ +50 Xu</span>
+              <span class="prize-chip">🪙 +25 Xu</span>
+              <span class="prize-chip">🎁 Huy hiệu "Vận May Đỏ"</span>
+            </div>
+          </div>
+
+          <div class="wheel-help-note">
+            💡 Mỗi lượt quay thêm chỉ tốn <strong>20 Xu</strong>. Sau mỗi 6 tiếng bạn sẽ được tặng 1 lượt quay hoàn toàn miễn phí.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 4: LEADERBOARD ==================== -->
+    <section id="view-leaderboard" class="app-view hidden">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">🏆 Bảng Vinh Danh Cao Thủ</h2>
+          <p class="section-subtitle">Xếp hạng thành tích người chơi xuất sắc nhất trên toàn hệ thống</p>
+        </div>
+
+        <div class="leaderboard-tabs-bar">
+          <button class="leaderboard-tab active" data-game="snake">🐍 Rắn Săn Mồi</button>
+          <button class="leaderboard-tab" data-game="2048">🔢 Neon 2048</button>
+          <button class="leaderboard-tab" data-game="caro">⭕ Cờ Caro</button>
+          <button class="leaderboard-tab" data-game="coins">💰 Đại Gia Xu</button>
+          <button class="leaderboard-tab" data-game="all">⭐ Tổng Hợp</button>
+        </div>
+      </div>
+
+      <!-- Top 3 Podium Container -->
+      <div id="leaderboardPodium" class="podium-container"></div>
+
+      <!-- Full Rankings Table -->
+      <div id="leaderboardList" class="leaderboard-table-card"></div>
+    </section>
+
+    <!-- ==================== VIEW 5: SHOP ==================== -->
+    <section id="view-shop" class="app-view hidden">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">🛒 Cửa Hàng Vật Phẩm & Danh Hiệu</h2>
+          <p class="section-subtitle">Dùng số Xu bạn tích lũy được từ các minigame để sở hữu avatar hiếm và danh hiệu danh giá</p>
+        </div>
+
+        <div class="shop-filter-bar">
+          <button class="shop-filter-btn active" data-filter="all">Tất cả</button>
+          <button class="shop-filter-btn" data-filter="avatar">🎭 Avatar Độc Quyền</button>
+          <button class="shop-filter-btn" data-filter="badge">🎖️ Danh Hiệu Quý Hiếm</button>
+        </div>
+      </div>
+
+      <div id="shopGrid" class="shop-cards-grid">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 6: ADMIN DATA MANAGEMENT ==================== -->
+    <section id="view-admin" class="app-view hidden">
+      <div class="section-header">
+        <div>
+          <div class="hero-badge">🔐 LESSON 6 - AUTHORIZATION & LESSON 11 - DATA MANAGEMENT</div>
+          <h2 class="section-title">Bảng Quản Trị Hệ Thống (Admin Panel)</h2>
+          <p class="section-subtitle">Chỉ tài khoản quyền Admin mới có thể truy cập, tìm kiếm, phân trang và quản trị dữ liệu người dùng</p>
+        </div>
+      </div>
+
+      <div class="admin-toolbar">
+        <div class="admin-search-box">
+          <input type="text" id="adminUserSearch" class="form-input" placeholder="🔍 Tìm kiếm theo tên người chơi...">
+        </div>
+        <div class="admin-toolbar-actions">
+          <button id="adminRefreshBtn" class="btn btn-outline btn-sm">🔄 Làm mới</button>
+        </div>
+      </div>
+
+      <div class="leaderboard-table-card">
+        <table class="leaderboard-table">
+          <thead>
+            <tr>
+              <th style="width: 60px;">ID</th>
+              <th>Người chơi</th>
+              <th>Vai trò</th>
+              <th>Số Xu</th>
+              <th>Danh hiệu</th>
+              <th>Ngày tạo</th>
+              <th style="text-align: right;">Hành động</th>
+            </tr>
+          </thead>
+          <tbody id="adminUserTableBody">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination Controls (Lesson 11) -->
+      <div class="pagination-bar">
+        <span id="adminPaginationInfo" class="pagination-info">Trang 1 / 1 (Tổng 0 người chơi)</span>
+        <div class="pagination-buttons">
+          <button id="adminPrevPageBtn" class="btn btn-outline btn-sm" disabled>◀ Trang trước</button>
+          <button id="adminNextPageBtn" class="btn btn-outline btn-sm" disabled>Trang sau ▶</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== AUTHENTICATION MODAL ==================== -->
+  <div id="authModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <button id="closeAuthModal" class="modal-close-btn">&times;</button>
+      
+      <div class="modal-header">
+        <div class="modal-logo">🎮</div>
+        <h3 class="modal-title">Tài Khoản Minigame Hub</h3>
+        <p class="modal-desc">Đăng nhập để lưu điểm kỷ lục, nhận Xu thưởng và leo Bảng xếp hạng</p>
+      </div>
+
+      <div class="auth-tabs">
+        <button class="auth-tab-btn active" data-mode="login">Đăng Nhập</button>
+        <button class="auth-tab-btn" data-mode="register">Đăng Ký</button>
+      </div>
+
+      <!-- Quick Demo Login Button for instant grading/testing -->
+      <div class="quick-demo-box">
+        <button id="quickDemoLoginBtn" type="button" class="btn btn-outline btn-sm btn-block">
+          ✨ Điền nhanh tài khoản mẫu (admin / 123456)
+        </button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="loginForm" class="auth-form">
+        <div class="form-group">
+          <label for="loginUsername">Tên tài khoản:</label>
+          <input type="text" id="loginUsername" class="form-input" placeholder="Nhập tên tài khoản" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">Mật khẩu:</label>
+          <input type="password" id="loginPassword" class="form-input" placeholder="Nhập mật khẩu" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top: 1rem;">Đăng Nhập Ngay</button>
+      </form>
+
+      <!-- Register Form -->
+      <form id="registerForm" class="auth-form hidden">
+        <div class="form-group">
+          <label for="regUsername">Tên tài khoản mới:</label>
+          <input type="text" id="regUsername" class="form-input" placeholder="Từ 3 đến 20 ký tự" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label for="regPassword">Mật khẩu:</label>
+          <input type="password" id="regPassword" class="form-input" placeholder="Tối thiểu 6 ký tự" required autocomplete="new-password">
+        </div>
+        <div class="form-group">
+          <label for="regConfirmPassword">Xác nhận mật khẩu:</label>
+          <input type="password" id="regConfirmPassword" class="form-input" placeholder="Nhập lại mật khẩu" required autocomplete="new-password">
+        </div>
+        <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top: 1rem;">Tạo Tài Khoản & Nhận 100 Xu</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== REWARD / WIN CELEBRATION MODAL ==================== -->
+  <div id="rewardModal" class="modal-overlay hidden">
+    <div class="modal-card text-center">
+      <div id="rewardIcon" class="reward-modal-icon">🎉</div>
+      <h3 id="rewardTitle" class="modal-title">CHÚC MỪNG BẠN!</h3>
+      <p id="rewardDesc" class="modal-desc">Bạn vừa nhận được phần thưởng giá trị!</p>
+      <button id="closeRewardModalBtn" class="btn btn-primary btn-lg" style="margin-top: 1.5rem;">Tuyệt Vời!</button>
+    </div>
+  </div>
+
+  <!-- ==================== AVATAR UPLOAD MODAL (LESSON 10) ==================== -->
+  <div id="uploadModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <button id="closeUploadModal" class="modal-close-btn">&times;</button>
+      <div class="modal-header">
+        <div class="modal-logo">📷</div>
+        <h3 class="modal-title">Tải Lên Ảnh Đại Diện</h3>
+        <p class="modal-desc">Sử dụng Multer (Lesson 10) để tải ảnh avatar từ máy tính</p>
+      </div>
+
+      <form id="avatarUploadForm" class="auth-form">
+        <div class="form-group">
+          <label for="avatarFileInput">Chọn file ảnh (PNG, JPG, WEBP, tối đa 5MB):</label>
+          <input type="file" id="avatarFileInput" class="form-input" accept="image/*" required>
+        </div>
+        <div id="avatarPreviewContainer" class="avatar-preview-box hidden">
+          <img id="avatarPreviewImg" src="" alt="Xem trước ảnh" class="preview-img">
+        </div>
+        <button type="submit" id="avatarUploadSubmitBtn" class="btn btn-primary btn-block btn-lg" style="margin-top: 1rem;">
+          🚀 Tải Lên & Cập Nhật Avatar
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Application Scripts -->
+  <script src="js/sound.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/games/caro.js"></script>
+  <script src="js/games/snake.js"></script>
+  <script src="js/games/game2048.js"></script>
+  <script src="js/games/wheel.js"></script>
+  <script src="js/shop.js"></script>
+  <script src="js/leaderboard.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
