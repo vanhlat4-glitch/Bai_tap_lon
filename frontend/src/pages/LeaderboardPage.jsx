@@ -1,12 +1,14 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchLeaderboard, setLeaderboardGame } from '../features/games/gamesSlice';
+import { useThemeLang } from '../context/ThemeLanguageContext';
 import { sound } from '../utils/sound';
 
 export default function LeaderboardPage() {
   const dispatch = useDispatch();
   const { leaderboard, leaderboardGame } = useSelector(state => state.games);
   const { user } = useSelector(state => state.auth);
+  const { lang, t } = useThemeLang();
 
   useEffect(() => {
     dispatch(fetchLeaderboard(leaderboardGame));
@@ -22,10 +24,12 @@ export default function LeaderboardPage() {
   const second = top3[1];
   const third = top3[2];
 
+  const numberLocale = lang === 'vi' ? 'vi-VN' : 'en-US';
+
   const formatScore = (val) => {
-    if (leaderboardGame === 'coins') return `${Number(val).toLocaleString('vi-VN')} Xu 💰`;
-    if (leaderboardGame === 'caro') return `${val} Trận thắng`;
-    return `${Number(val).toLocaleString('vi-VN')} pts`;
+    if (leaderboardGame === 'coins') return `${Number(val).toLocaleString(numberLocale)} ${lang === 'vi' ? 'Xu 💰' : 'Coins 💰'}`;
+    if (leaderboardGame === 'caro') return `${val} ${lang === 'vi' ? 'Trận thắng' : 'Wins'}`;
+    return `${Number(val).toLocaleString(numberLocale)} pts`;
   };
 
   const renderAvatar = (av) => {
@@ -39,22 +43,22 @@ export default function LeaderboardPage() {
     <div>
       <div className="section-header">
         <div>
-          <h2 className="section-title">🏆 Bảng Vinh Danh Cao Thủ</h2>
-          <p className="section-subtitle">Xếp hạng thành tích người chơi xuất sắc nhất trên toàn hệ thống</p>
+          <h2 className="section-title">🏆 {t('leaderboard.title')}</h2>
+          <p className="section-subtitle">{t('leaderboard.subtitle')}</p>
         </div>
 
         <div className="leaderboard-tabs-bar">
           <button className={`leaderboard-tab ${leaderboardGame === 'snake' ? 'active' : ''}`} onClick={() => handleFilter('snake')}>
-            🐍 Rắn Săn Mồi
+            🐍 {lang === 'vi' ? 'Rắn Săn Mồi' : 'Cyber Snake'}
           </button>
           <button className={`leaderboard-tab ${leaderboardGame === '2048' ? 'active' : ''}`} onClick={() => handleFilter('2048')}>
             🔢 Neon 2048
           </button>
           <button className={`leaderboard-tab ${leaderboardGame === 'caro' ? 'active' : ''}`} onClick={() => handleFilter('caro')}>
-            ⭕ Cờ Caro
+            ⭕ {lang === 'vi' ? 'Cờ Caro' : 'Gomoku Caro'}
           </button>
           <button className={`leaderboard-tab ${leaderboardGame === 'coins' ? 'active' : ''}`} onClick={() => handleFilter('coins')}>
-            💰 Đại Gia Xu
+            💰 {lang === 'vi' ? 'Đại Gia Xu' : 'Coin Tycoons'}
           </button>
         </div>
       </div>
@@ -99,33 +103,43 @@ export default function LeaderboardPage() {
         <table className="leaderboard-table">
           <thead>
             <tr>
-              <th style={{ width: '70px' }}>Hạng</th>
-              <th>Người chơi</th>
-              <th>Danh hiệu</th>
-              <th style={{ textAlign: 'right' }}>{leaderboardGame === 'coins' ? 'Số Xu' : 'Kỷ lục'}</th>
+              <th style={{ width: '70px' }}>{t('leaderboard.rank')}</th>
+              <th>{t('leaderboard.player')}</th>
+              <th>{lang === 'vi' ? 'Danh hiệu' : 'Badge'}</th>
+              <th style={{ textAlign: 'right' }}>{leaderboardGame === 'coins' ? (lang === 'vi' ? 'Số Xu' : 'Coins') : t('leaderboard.score')}</th>
             </tr>
           </thead>
           <tbody>
-            {leaderboard.map(p => {
-              const isMe = user && (user.id === p.user_id || user.username === p.username);
-              const rankBadge = p.rank === 1 ? '🥇' : p.rank === 2 ? '🥈' : p.rank === 3 ? '🥉' : `#${p.rank}`;
+            {leaderboard.length === 0 ? (
+              <tr>
+                <td colSpan="4" style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>
+                  {t('leaderboard.empty')}
+                </td>
+              </tr>
+            ) : (
+              leaderboard.map(p => {
+                const isMe = user && (user.id === p.user_id || user.username === p.username);
+                const rankBadge = p.rank === 1 ? '🥇' : p.rank === 2 ? '🥈' : p.rank === 3 ? '🥉' : `#${p.rank}`;
 
-              return (
-                <tr key={p.user_id || p.rank} className={isMe ? 'highlight-me' : ''}>
-                  <td className="rank-cell"><span className={`rank-badge rank-${p.rank}`}>{rankBadge}</span></td>
-                  <td>
-                    <div className="player-cell">
-                      <span className="player-avatar">{renderAvatar(p.avatar)}</span>
-                      <span className="player-name">{p.username} {isMe && <small className="tag-you">(Bạn)</small>}</span>
-                    </div>
-                  </td>
-                  <td><span className="badge-pill">{p.badge || 'Tân thủ'}</span></td>
-                  <td style={{ textAlign: 'right', fontWeight: 700, color: '#38bdf8' }}>
-                    {formatScore(p.score)}
-                  </td>
-                </tr>
-              );
-            })}
+                return (
+                  <tr key={p.user_id || p.rank} className={isMe ? 'highlight-me' : ''}>
+                    <td className="rank-cell"><span className={`rank-badge rank-${p.rank}`}>{rankBadge}</span></td>
+                    <td>
+                      <div className="player-cell">
+                        <span className="player-avatar">{renderAvatar(p.avatar)}</span>
+                        <span className="player-name">
+                          {p.username} {isMe && <small className="tag-you">({lang === 'vi' ? 'Bạn' : 'You'})</small>}
+                        </span>
+                      </div>
+                    </td>
+                    <td><span className="badge-pill">{p.badge || (lang === 'vi' ? 'Tân thủ' : 'Novice')}</span></td>
+                    <td style={{ textAlign: 'right', fontWeight: 700, color: 'var(--accent-cyan)' }}>
+                      {formatScore(p.score)}
+                    </td>
+                  </tr>
+                );
+              })
+            )}
           </tbody>
         </table>
       </div>

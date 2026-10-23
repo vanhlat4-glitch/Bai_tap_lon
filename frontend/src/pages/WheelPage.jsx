@@ -1,37 +1,39 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { updateCoins } from '../features/auth/authSlice';
+import { useThemeLang } from '../context/ThemeLanguageContext';
 import { sound } from '../utils/sound';
 
 const WHEEL_SEGMENTS = [
-  { id: 0, label: '+10 Xu', type: 'coins', value: 10, color: '#f59e0b' },
-  { id: 1, label: '+25 Xu', type: 'coins', value: 25, color: '#10b981' },
-  { id: 2, label: '+50 Xu', type: 'coins', value: 50, color: '#3b82f6' },
-  { id: 3, label: '🎁 Huy Hiệu Đỏ', type: 'badge', value: 'Vận May Đỏ', color: '#ec4899' },
-  { id: 4, label: '+15 Xu', type: 'coins', value: 15, color: '#8b5cf6' },
-  { id: 5, label: '💎 +100 Xu', type: 'coins', value: 100, color: '#06b6d4' },
-  { id: 6, label: '💥 JACKPOT 300', type: 'coins', value: 300, color: '#ef4444' },
-  { id: 7, label: '🍀 +80 Xu', type: 'coins', value: 80, color: '#14b8a6' }
+  { id: 0, label: '+10 Xu', labelEn: '+10 Coins', type: 'coins', value: 10, color: '#f59e0b' },
+  { id: 1, label: '+25 Xu', labelEn: '+25 Coins', type: 'coins', value: 25, color: '#10b981' },
+  { id: 2, label: '+50 Xu', labelEn: '+50 Coins', type: 'coins', value: 50, color: '#3b82f6' },
+  { id: 3, label: '🎁 Huy Hiệu Đỏ', labelEn: '🎁 Red Badge', type: 'badge', value: 'Vận May Đỏ', color: '#ec4899' },
+  { id: 4, label: '+15 Xu', labelEn: '+15 Coins', type: 'coins', value: 15, color: '#8b5cf6' },
+  { id: 5, label: '💎 +100 Xu', labelEn: '💎 +100 Coins', type: 'coins', value: 100, color: '#06b6d4' },
+  { id: 6, label: '💥 JACKPOT 300', labelEn: '💥 JACKPOT 300', type: 'coins', value: 300, color: '#ef4444' },
+  { id: 7, label: '🍀 +80 Xu', labelEn: '🍀 +80 Coins', type: 'coins', value: 80, color: '#14b8a6' }
 ];
 
 export default function WheelPage({ showToast, onPrizeWon, openAuth }) {
   const dispatch = useDispatch();
   const { user } = useSelector(state => state.auth);
+  const { lang, t } = useThemeLang();
   const canvasRef = useRef(null);
 
   const [isSpinning, setIsSpinning] = useState(false);
   const rotationRef = useRef(0);
-  const [costText, setCostText] = useState('Đang kiểm tra lượt quay...');
+  const [costText, setCostText] = useState('');
   const [countdown, setCountdown] = useState('');
 
   useEffect(() => {
     drawWheel();
     checkCooldown();
-  }, [user]);
+  }, [user, lang]);
 
   const checkCooldown = async () => {
     if (!user) {
-      setCostText('Đăng nhập để nhận 1 lượt quay miễn phí mỗi 6 tiếng!');
+      setCostText(lang === 'vi' ? 'Đăng nhập để nhận 1 lượt quay miễn phí mỗi 6 tiếng!' : 'Sign in to get 1 free spin every 6 hours!');
       setCountdown('');
       return;
     }
@@ -41,10 +43,10 @@ export default function WheelPage({ showToast, onPrizeWon, openAuth }) {
       });
       const data = await res.json();
       if (data.wheel && !data.wheel.canFreeSpin) {
-        setCostText('Lượt tiếp theo: 20 Xu');
+        setCostText(lang === 'vi' ? 'Lượt tiếp theo: 20 Xu' : 'Next spin: 20 Coins');
         startTimer(data.wheel.secondsUntilFreeSpin);
       } else {
-        setCostText('Lượt quay này: ✨ MIỄN PHÍ ✨');
+        setCostText(lang === 'vi' ? 'Lượt quay này: ✨ MIỄN PHÍ ✨' : 'This spin is: ✨ FREE ✨');
         setCountdown('');
       }
     } catch (e) {}
@@ -61,7 +63,11 @@ export default function WheelPage({ showToast, onPrizeWon, openAuth }) {
       const h = Math.floor(rem / 3600);
       const m = Math.floor((rem % 3600) / 60);
       const s = rem % 60;
-      setCountdown(`Lượt miễn phí sau: ${h}h ${m}m ${s}s`);
+      setCountdown(
+        lang === 'vi'
+          ? `Lượt miễn phí sau: ${h}h ${m}m ${s}s`
+          : `Next free spin in: ${h}h ${m}m ${s}s`
+      );
       rem--;
     }, 1000);
   };
@@ -107,7 +113,8 @@ export default function WheelPage({ showToast, onPrizeWon, openAuth }) {
       ctx.font = 'bold 14px Outfit, sans-serif';
       ctx.shadowColor = 'rgba(0,0,0,0.8)';
       ctx.shadowBlur = 4;
-      ctx.fillText(seg.label, radius - 20, 5);
+      const labelText = lang === 'en' ? seg.labelEn : seg.label;
+      ctx.fillText(labelText, radius - 20, 5);
       ctx.restore();
     });
 
@@ -160,7 +167,7 @@ export default function WheelPage({ showToast, onPrizeWon, openAuth }) {
   const spin = async () => {
     if (isSpinning) return;
     if (!user) {
-      showToast('Vui lòng đăng nhập để quay Vòng Quay!', 'warning');
+      showToast(lang === 'vi' ? 'Vui lòng đăng nhập để quay Vòng Quay!' : 'Please sign in to spin the wheel!', 'warning');
       openAuth('login');
       return;
     }
@@ -224,15 +231,15 @@ export default function WheelPage({ showToast, onPrizeWon, openAuth }) {
   return (
     <div>
       <div className="section-header text-center">
-        <h2 className="section-title">🎡 Vòng Quay May Mắn</h2>
-        <p className="section-subtitle">Mỗi ngày nhận 1 lượt quay miễn phí để rinh về hàng trăm Xu thưởng và Danh hiệu độc quyền!</p>
+        <h2 className="section-title">🎡 {t('wheel.title')}</h2>
+        <p className="section-subtitle">{t('wheel.subtitle')}</p>
       </div>
 
       <div className="wheel-center-container">
         <div className="wheel-box">
           <canvas ref={canvasRef} width="380" height="380" />
           <button className="btn btn-primary btn-spin" onClick={spin} disabled={isSpinning}>
-            {isSpinning ? 'ĐANG QUAY...' : 'QUAY NGAY'}
+            {isSpinning ? (lang === 'vi' ? 'ĐANG QUAY...' : 'SPINNING...') : (lang === 'vi' ? 'QUAY NGAY' : 'SPIN NOW')}
           </button>
         </div>
 
@@ -241,19 +248,23 @@ export default function WheelPage({ showToast, onPrizeWon, openAuth }) {
           <div className="wheel-countdown-text">{countdown}</div>
 
           <div className="wheel-prizes-list">
-            <h4>Danh sách quà tặng:</h4>
+            <h4>{lang === 'vi' ? 'Danh sách quà tặng:' : 'Prize breakdown:'}</h4>
             <div className="prize-chips-grid">
-              <span className="prize-chip">💥 Jackpot 300 Xu</span>
-              <span className="prize-chip">💎 +100 Xu</span>
-              <span className="prize-chip">🍀 +80 Xu</span>
-              <span className="prize-chip">⚡ +50 Xu</span>
-              <span className="prize-chip">🪙 +25 Xu</span>
-              <span className="prize-chip">🎁 Huy hiệu "Vận May Đỏ"</span>
+              <span className="prize-chip">{lang === 'vi' ? '💥 Jackpot 300 Xu' : '💥 Jackpot 300 Coins'}</span>
+              <span className="prize-chip">{lang === 'vi' ? '💎 +100 Xu' : '💎 +100 Coins'}</span>
+              <span className="prize-chip">{lang === 'vi' ? '🍀 +80 Xu' : '🍀 +80 Coins'}</span>
+              <span className="prize-chip">{lang === 'vi' ? '⚡ +50 Xu' : '⚡ +50 Coins'}</span>
+              <span className="prize-chip">{lang === 'vi' ? '🪙 +25 Xu' : '🪙 +25 Coins'}</span>
+              <span className="prize-chip">{lang === 'vi' ? '🎁 Huy hiệu "Vận May Đỏ"' : '🎁 "Red Fortune" Badge'}</span>
             </div>
           </div>
 
           <div className="wheel-help-note">
-            💡 Mỗi lượt quay thêm chỉ tốn <strong>20 Xu</strong>. Sau mỗi 6 tiếng bạn sẽ được tặng 1 lượt quay hoàn toàn miễn phí.
+            {lang === 'vi' ? (
+              <>💡 Mỗi lượt quay thêm chỉ tốn <strong>20 Xu</strong>. Sau mỗi 6 tiếng bạn sẽ được tặng 1 lượt quay hoàn toàn miễn phí.</>
+            ) : (
+              <>💡 Extra spins cost only <strong>20 Coins</strong>. You receive 1 free spin every 6 hours automatically.</>
+            )}
           </div>
         </div>
       </div>

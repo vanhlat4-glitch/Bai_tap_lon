@@ -12,11 +12,13 @@ import WheelPage from './pages/WheelPage';
 import LeaderboardPage from './pages/LeaderboardPage';
 import ShopPage from './pages/ShopPage';
 import AdminPage from './pages/AdminPage';
+import { useThemeLang } from './context/ThemeLanguageContext';
 import './App.css';
 
 export default function App() {
   const dispatch = useDispatch();
   const { user, initializing } = useSelector(state => state.auth);
+  const { theme, lang, t } = useThemeLang();
 
   const [currentView, setView] = useState('home');
   const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -79,12 +81,12 @@ export default function App() {
   // 1. Initializing state (verifying existing session token)
   if (initializing) {
     return (
-      <div className="app-root">
+      <div className={`app-root theme-${theme}`} data-theme={theme}>
         <div className="ambient-glow glow-1"></div>
         <div className="ambient-glow glow-2"></div>
         <div className="cyber-loader-container">
           <div className="cyber-spinner"></div>
-          <p className="cyber-loader-text">Đang kết nối Cyber Hub...</p>
+          <p className="cyber-loader-text">{lang === 'vi' ? 'Đang kết nối Cyber Hub...' : 'Connecting to Cyber Hub...'}</p>
         </div>
         {toastContainer}
       </div>
@@ -94,7 +96,7 @@ export default function App() {
   // Unauthenticated guests can freely explore the portal; actions needing auth open AuthModal
   const handleSetView = (view) => {
     if (view === 'admin' && (!user || (user.role !== 'admin' && user.username?.toLowerCase() !== 'admin'))) {
-      showToast('Khu vực dành cho Quản trị viên! Vui lòng đăng nhập tài khoản admin (admin / 123456)', 'warning');
+      showToast(t('nav.adminRequiredToast'), 'warning');
       openAuth('login');
       return;
     }
@@ -102,7 +104,7 @@ export default function App() {
   };
 
   return (
-    <div className="app-root">
+    <div className={`app-root theme-${theme}`} data-theme={theme}>
       {/* Background ambient mesh grid & glow orbs */}
       <div className="ambient-grid"></div>
       <div className="ambient-glow glow-1"></div>

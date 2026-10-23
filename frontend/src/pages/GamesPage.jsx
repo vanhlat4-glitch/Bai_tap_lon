@@ -4,11 +4,13 @@ import { setActiveGame } from '../features/games/gamesSlice';
 import CaroGame from '../games/CaroGame';
 import SnakeGame from '../games/SnakeGame';
 import Game2048 from '../games/Game2048';
+import { useThemeLang } from '../context/ThemeLanguageContext';
 import { sound } from '../utils/sound';
 
 export default function GamesPage({ showToast }) {
   const dispatch = useDispatch();
   const { activeGame } = useSelector(state => state.games);
+  const { lang, t } = useThemeLang();
 
   const handleTabChange = (gameKey) => {
     sound.click();
@@ -22,19 +24,19 @@ export default function GamesPage({ showToast }) {
           className={`game-tab-btn ${activeGame === 'caro' ? 'active' : ''}`}
           onClick={() => handleTabChange('caro')}
         >
-          ⭕❌ Cờ Caro Tinh Anh
+          ⭕❌ {t('games.caroTitle')}
         </button>
         <button
           className={`game-tab-btn ${activeGame === 'snake' ? 'active' : ''}`}
           onClick={() => handleTabChange('snake')}
         >
-          🐍 Cyber Snake 2.0
+          🐍 {t('games.snakeTitle')}
         </button>
         <button
           className={`game-tab-btn ${activeGame === '2048' ? 'active' : ''}`}
           onClick={() => handleTabChange('2048')}
         >
-          🔢 Neon 2048
+          🔢 {t('games.game2048Title')}
         </button>
       </div>
 

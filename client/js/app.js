@@ -1,16 +1,42 @@
 // Main App Initializer & UI Routing
 document.addEventListener('DOMContentLoaded', async () => {
-  // Initialize Sound button
-  const soundToggleBtn = document.getElementById('soundToggleBtn');
-  if (soundToggleBtn) {
-    const updateSoundIcon = () => {
-      soundToggleBtn.innerHTML = window.sound.enabled ? '🔊 <span class="nav-text">Âm thanh</span>' : '🔇 <span class="nav-text">Tắt tiếng</span>';
+  // Initialize Theme Toggle
+  const themeToggleBtn = document.getElementById('themeToggleBtn');
+  let currentTheme = localStorage.getItem('minigame_theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', currentTheme);
+  const updateThemeBtn = () => {
+    if (themeToggleBtn) {
+      themeToggleBtn.innerHTML = currentTheme === 'dark' ? '☀️' : '🌙';
+      themeToggleBtn.title = currentTheme === 'dark' ? 'Chuyển sang Chế độ Sáng' : 'Chuyển sang Chế độ Tối';
+    }
+  };
+  updateThemeBtn();
+  if (themeToggleBtn) {
+    themeToggleBtn.onclick = () => {
+      currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', currentTheme);
+      localStorage.setItem('minigame_theme', currentTheme);
+      updateThemeBtn();
+      showToast(currentTheme === 'dark' ? 'Đã bật Chế độ Tối' : 'Đã bật Chế độ Sáng', 'info');
     };
-    updateSoundIcon();
-    soundToggleBtn.onclick = () => {
-      window.sound.toggle();
-      updateSoundIcon();
-      showToast(window.sound.enabled ? 'Đã bật âm thanh' : 'Đã tắt âm thanh', 'info');
+  }
+
+  // Initialize Language Toggle
+  const langToggleBtn = document.getElementById('langToggleBtn');
+  let currentLang = localStorage.getItem('minigame_lang') || 'vi';
+  const updateLangBtn = () => {
+    if (langToggleBtn) {
+      langToggleBtn.innerHTML = `<span class="lang-flag">${currentLang === 'vi' ? '🇻🇳' : '🇬🇧'}</span> <span class="lang-code">${currentLang.toUpperCase()}</span>`;
+      langToggleBtn.title = currentLang === 'vi' ? 'Switch to English' : 'Chuyển sang Tiếng Việt';
+    }
+  };
+  updateLangBtn();
+  if (langToggleBtn) {
+    langToggleBtn.onclick = () => {
+      currentLang = currentLang === 'vi' ? 'en' : 'vi';
+      localStorage.setItem('minigame_lang', currentLang);
+      updateLangBtn();
+      showToast(currentLang === 'vi' ? 'Đã đổi sang Tiếng Việt' : 'Switched to English', 'info');
     };
   }
 

@@ -2,12 +2,14 @@ import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchShopItems, buyItem, setFilter } from '../features/shop/shopSlice';
 import { updateProfile } from '../features/auth/authSlice';
+import { useThemeLang } from '../context/ThemeLanguageContext';
 import { sound } from '../utils/sound';
 
 export default function ShopPage({ showToast, openAuth }) {
   const dispatch = useDispatch();
   const { items, filter } = useSelector(state => state.shop);
   const { user, inventory } = useSelector(state => state.auth);
+  const { lang, t } = useThemeLang();
 
   useEffect(() => {
     dispatch(fetchShopItems());
@@ -17,21 +19,29 @@ export default function ShopPage({ showToast, openAuth }) {
 
   const handleBuy = async (item) => {
     if (!user) {
-      showToast('Vui lòng đăng nhập để mua vật phẩm!', 'warning');
+      showToast(lang === 'vi' ? 'Vui lòng đăng nhập để mua vật phẩm!' : 'Please sign in to buy items!', 'warning');
       openAuth('login');
       return;
     }
     if (user.coins < item.price) {
-      showToast(`Không đủ Xu! Bạn còn thiếu ${item.price - user.coins} Xu.`, 'error');
+      showToast(
+        lang === 'vi'
+          ? `Không đủ Xu! Bạn còn thiếu ${item.price - user.coins} Xu.`
+          : `Not enough Coins! You need ${item.price - user.coins} more Coins.`,
+        'error'
+      );
       return;
     }
 
     const result = await dispatch(buyItem({ itemId: item.id, equipNow: true }));
     if (!result.error) {
       sound.coin();
-      showToast(`🎉 Mua thành công "${item.name}"!`, 'success');
+      showToast(
+        lang === 'vi' ? `🎉 Mua thành công "${item.name}"!` : `🎉 Successfully purchased "${item.name}"!`,
+        'success'
+      );
     } else {
-      showToast(result.payload || 'Giao dịch thất bại', 'error');
+      showToast(result.payload || (lang === 'vi' ? 'Giao dịch thất bại' : 'Transaction failed'), 'error');
     }
   };
 
@@ -40,7 +50,12 @@ export default function ShopPage({ showToast, openAuth }) {
     const result = await dispatch(updateProfile(payload));
     if (!result.error) {
       sound.click();
-      showToast(`Đã trang bị ${item.type === 'avatar' ? 'Avatar' : 'Danh hiệu'} mới!`, 'success');
+      showToast(
+        lang === 'vi'
+          ? `Đã trang bị ${item.type === 'avatar' ? 'Avatar' : 'Danh hiệu'} mới!`
+          : `Equipped new ${item.type === 'avatar' ? 'Avatar' : 'Badge'}!`,
+        'success'
+      );
     }
   };
 
@@ -53,19 +68,19 @@ export default function ShopPage({ showToast, openAuth }) {
     <div>
       <div className="section-header">
         <div>
-          <h2 className="section-title">🛒 Cửa Hàng Vật Phẩm & Danh Hiệu</h2>
-          <p className="section-subtitle">Dùng số Xu bạn tích lũy được từ minigame để sở hữu avatar hiếm và danh hiệu danh giá</p>
+          <h2 className="section-title">🛒 {t('shop.title')}</h2>
+          <p className="section-subtitle">{t('shop.subtitle')}</p>
         </div>
 
         <div className="shop-filter-bar">
           <button className={`shop-filter-btn ${filter === 'all' ? 'active' : ''}`} onClick={() => dispatch(setFilter('all'))}>
-            Tất cả
+            {t('shop.tabAll')}
           </button>
           <button className={`shop-filter-btn ${filter === 'avatar' ? 'active' : ''}`} onClick={() => dispatch(setFilter('avatar'))}>
-            🎭 Avatar Độc Quyền
+            🎭 {t('shop.tabAvatars')}
           </button>
           <button className={`shop-filter-btn ${filter === 'badge' ? 'active' : ''}`} onClick={() => dispatch(setFilter('badge'))}>
-            🎖️ Danh Hiệu Quý Hiếm
+            🎖️ {t('shop.tabBadges')}
           </button>
         </div>
       </div>
@@ -80,21 +95,25 @@ export default function ShopPage({ showToast, openAuth }) {
 
           return (
             <div key={item.id} className={`shop-card ${isOwned ? 'owned' : ''} ${isEquipped ? 'equipped' : ''}`}>
-              <div className="shop-card-badge">{item.type === 'avatar' ? 'Avatar' : 'Danh hiệu'}</div>
+              <div className="shop-card-badge">{item.type === 'avatar' ? (lang === 'vi' ? 'Avatar' : 'Avatar') : (lang === 'vi' ? 'Danh hiệu' : 'Badge')}</div>
               <div className="shop-card-icon">{item.icon}</div>
               <div className="shop-card-name">{item.name}</div>
               <div className="shop-card-desc">{item.description}</div>
               <div className="shop-card-footer">
                 <div className="shop-card-price">
-                  {isOwned ? <span>Đã sở hữu</span> : <>💰 <strong>{item.price}</strong> Xu</>}
+                  {isOwned ? (
+                    <span>{t('shop.btnOwned')}</span>
+                  ) : (
+                    <>💰 <strong>{item.price}</strong> {lang === 'vi' ? 'Xu' : 'Coins'}</>
+                  )}
                 </div>
                 <div className="shop-card-action">
                   {isEquipped ? (
-                    <button className="btn btn-secondary btn-sm" disabled>Đang dùng</button>
+                    <button className="btn btn-secondary btn-sm" disabled>{t('shop.btnEquipped')}</button>
                   ) : isOwned ? (
-                    <button className="btn btn-outline btn-sm" onClick={() => handleEquip(item)}>Trang bị</button>
+                    <button className="btn btn-outline btn-sm" onClick={() => handleEquip(item)}>{t('shop.btnEquip')}</button>
                   ) : (
-                    <button className="btn btn-primary btn-sm" onClick={() => handleBuy(item)}>Mua ngay</button>
+                    <button className="btn btn-primary btn-sm" onClick={() => handleBuy(item)}>{t('shop.btnBuy')}</button>
                   )}
                 </div>
               </div>
