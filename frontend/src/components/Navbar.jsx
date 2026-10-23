@@ -50,20 +50,41 @@ export default function Navbar({ currentView, setView, openAuth, openUpload, sho
           <button className={`nav-link ${currentView === 'shop' ? 'active' : ''}`} onClick={() => { sound.click(); setView('shop'); }}>
             🛒 <span className="nav-text">Cửa hàng</span>
           </button>
-          {isAdmin && (
-            <button className={`nav-link ${currentView === 'admin' ? 'active' : ''}`} onClick={() => { sound.click(); setView('admin'); }}>
-              ⚙️ <span className="nav-text">Quản trị</span>
-            </button>
-          )}
+          <button
+            className={`nav-link ${currentView === 'admin' ? 'active' : ''} ${!isAdmin ? 'nav-link-locked' : ''}`}
+            onClick={() => {
+              sound.click();
+              if (!isAdmin) {
+                showToast('Chức năng Quản Trị yêu cầu đăng nhập Admin (admin / 123456)', 'warning');
+                openAuth('login');
+              } else {
+                setView('admin');
+              }
+            }}
+            title={isAdmin ? "Trang quản trị hệ thống" : "Đăng nhập admin để mở khóa"}
+          >
+            ⚙️ <span className="nav-text">Quản trị</span>
+            {!isAdmin && <span className="lock-pill">Khoá</span>}
+          </button>
         </nav>
 
         <div className="header-actions">
-          <button className="btn btn-icon" onClick={toggleSound} title="Bật/Tắt âm thanh">
+          <button className="btn btn-icon sound-btn" onClick={toggleSound} title="Bật/Tắt âm thanh">
             {soundActive ? '🔊' : '🔇'} <span className="nav-text">{soundActive ? 'Âm thanh' : 'Tắt tiếng'}</span>
           </button>
 
           {!user ? (
             <div className="auth-buttons">
+              <button
+                className="btn btn-demo-quick btn-sm"
+                onClick={() => {
+                  sound.click();
+                  openAuth('login');
+                }}
+                title="Đăng nhập nhanh tài khoản mẫu chấm điểm: admin / 123456"
+              >
+                ⚡ Demo Admin
+              </button>
               <button className="btn btn-outline btn-sm" onClick={() => openAuth('login')}>Đăng nhập</button>
               <button className="btn btn-primary btn-sm" onClick={() => openAuth('register')}>Đăng ký</button>
             </div>

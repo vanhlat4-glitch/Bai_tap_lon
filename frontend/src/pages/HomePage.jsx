@@ -3,8 +3,9 @@ import { useSelector, useDispatch } from 'react-redux';
 import { fetchPlatformStats, fetchMatchHistory, setActiveGame } from '../features/games/gamesSlice';
 import { sound } from '../utils/sound';
 
-export default function HomePage({ setView }) {
+export default function HomePage({ setView, openAuth }) {
   const dispatch = useDispatch();
+  const { user } = useSelector(state => state.auth);
   const { stats, history } = useSelector(state => state.games);
 
   useEffect(() => {
@@ -20,10 +21,25 @@ export default function HomePage({ setView }) {
 
   return (
     <div>
+      {/* Teacher / Demo Reviewer Quick Access Banner */}
+      {!user && (
+        <div className="demo-notice-banner">
+          <div className="demo-notice-left">
+            <span className="demo-badge-pill">🎓 DÀNH CHO THẦY CÔ CHẤM ĐIỂM</span>
+            <span className="demo-notice-text">
+              Đăng nhập nhanh tài khoản <strong>Admin</strong> (<code>admin</code> / <code>123456</code>) để test toàn bộ phân quyền quản trị, chỉnh sửa Xu và xoá user!
+            </span>
+          </div>
+          <button className="btn btn-primary btn-sm demo-login-btn" onClick={() => { sound.click(); openAuth && openAuth('login'); }}>
+            ⚡ Đăng Nhập Admin
+          </button>
+        </div>
+      )}
+
       {/* Hero Card */}
       <div className="hero-card">
         <div className="hero-content">
-          <div className="hero-badge">⚡ REACT + REDUX TOOLKIT MINIGAME HUB</div>
+          <div className="hero-badge">⚡ FULL-STACK WEB3 GAMING ENGINE (14 LESSONS)</div>
           <h1 className="hero-title">Đấu Trí, Săn Điểm & <br /><span className="gradient-text">Leo Bảng Xếp Hạng</span></h1>
           <p className="hero-desc">
             Trải nghiệm 4 trò chơi kinh điển xây dựng hoàn toàn bằng React và Redux Toolkit,
@@ -36,10 +52,10 @@ export default function HomePage({ setView }) {
           </div>
         </div>
         <div className="hero-visual">
-          <div className="hero-game-badge badge-caro">⭕❌ Gomoku Caro</div>
-          <div className="hero-game-badge badge-snake">🐍 Cyber Snake</div>
-          <div className="hero-game-badge badge-2048">🔢 Neon 2048</div>
-          <div className="hero-game-badge badge-wheel">🎡 Lucky Wheel</div>
+          <div className="hero-game-badge badge-caro" onClick={() => selectAndPlay('caro')}>⭕❌ Gomoku Caro</div>
+          <div className="hero-game-badge badge-snake" onClick={() => selectAndPlay('snake')}>🐍 Cyber Snake</div>
+          <div className="hero-game-badge badge-2048" onClick={() => selectAndPlay('2048')}>🔢 Neon 2048</div>
+          <div className="hero-game-badge badge-wheel" onClick={() => { sound.click(); setView('wheel'); }}>🎡 Lucky Wheel</div>
           <div className="hero-orb"></div>
         </div>
       </div>

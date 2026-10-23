@@ -51,30 +51,68 @@ body {
   position: relative;
 }
 
-/* Ambient Background Glow Orbs */
+/* Ambient Futuristic Grid & Mesh System (Google Stitch Style) */
+.ambient-grid {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.75;
+}
+
+/* Ambient Background Luminous Glow Orbs */
 .ambient-glow {
   position: fixed;
-  width: 550px;
-  height: 550px;
   border-radius: 50%;
   filter: blur(140px);
   pointer-events: none;
   z-index: 0;
-  opacity: 0.18;
+  opacity: 0.22;
+  animation: floatGlow 18s ease-in-out infinite alternate;
 }
+
 .glow-1 {
-  background: radial-gradient(circle, #38bdf8, #3b82f6);
-  top: -120px;
-  left: -100px;
+  width: 650px;
+  height: 650px;
+  background: radial-gradient(circle, #38bdf8, #2563eb);
+  top: -160px;
+  left: -140px;
 }
+
 .glow-2 {
-  background: radial-gradient(circle, #8b5cf6, #ec4899);
-  bottom: -150px;
-  right: -100px;
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, #a855f7, #ec4899);
+  bottom: -180px;
+  right: -120px;
+  animation-delay: -6s;
+}
+
+.glow-3 {
+  width: 520px;
+  height: 520px;
+  background: radial-gradient(circle, #10b981, #06b6d4);
+  top: 35%;
+  left: 55%;
+  opacity: 0.12;
+  animation-delay: -11s;
+}
+
+@keyframes floatGlow {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(30px, 40px) scale(1.08); }
+  100% { transform: translate(-20px, 20px) scale(0.95); }
 }
 
 .container {
-  max-width: 1240px;
+  max-width: 1260px;
   margin: 0 auto;
   padding: 0 1.5rem;
   position: relative;

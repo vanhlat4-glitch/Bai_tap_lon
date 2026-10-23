@@ -91,31 +91,28 @@ export default function App() {
     );
   }
 
-  // 2. Not logged in -> Show AuthPage (Login / Register Gate)
-  if (!user) {
-    return (
-      <div className="app-root">
-        <div className="ambient-glow glow-1"></div>
-        <div className="ambient-glow glow-2"></div>
-        <div className="auth-page-wrapper">
-          <AuthPage showToast={showToast} />
-        </div>
-        {toastContainer}
-      </div>
-    );
-  }
+  // Unauthenticated guests can freely explore the portal; actions needing auth open AuthModal
+  const handleSetView = (view) => {
+    if (view === 'admin' && (!user || (user.role !== 'admin' && user.username?.toLowerCase() !== 'admin'))) {
+      showToast('Khu vực dành cho Quản trị viên! Vui lòng đăng nhập tài khoản admin (admin / 123456)', 'warning');
+      openAuth('login');
+      return;
+    }
+    setView(view);
+  };
 
-  // 3. Authenticated -> Show Full Game Hub
   return (
     <div className="app-root">
-      {/* Ambient background glow orbs */}
+      {/* Background ambient mesh grid & glow orbs */}
+      <div className="ambient-grid"></div>
       <div className="ambient-glow glow-1"></div>
       <div className="ambient-glow glow-2"></div>
+      <div className="ambient-glow glow-3"></div>
 
       {/* Main Navbar */}
       <Navbar
         currentView={currentView}
-        setView={setView}
+        setView={handleSetView}
         openAuth={openAuth}
         openUpload={() => setUploadModalOpen(true)}
         showToast={showToast}
@@ -123,14 +120,15 @@ export default function App() {
 
       {/* Page Routing */}
       <main className="app-main container">
-        {currentView === 'home' && <HomePage setView={setView} />}
-        {currentView === 'games' && <GamesPage showToast={showToast} />}
+        {currentView === 'home' && <HomePage setView={handleSetView} openAuth={openAuth} />}
+        {currentView === 'games' && <GamesPage showToast={showToast} openAuth={openAuth} />}
         {currentView === 'wheel' && (
           <WheelPage showToast={showToast} onPrizeWon={handlePrizeWon} openAuth={openAuth} />
         )}
         {currentView === 'leaderboard' && <LeaderboardPage />}
         {currentView === 'shop' && <ShopPage showToast={showToast} openAuth={openAuth} />}
         {currentView === 'admin' && <AdminPage showToast={showToast} />}
+        {currentView === 'auth' && <AuthPage showToast={showToast} setView={handleSetView} />}
       </main>
 
       {/* Modals */}
