@@ -74,22 +74,18 @@ export default function Navbar({ currentView, setView, openAuth, openUpload, sho
           <button className={`nav-link ${currentView === 'shop' ? 'active' : ''}`} onClick={() => { sound.click(); setView('shop'); }}>
             🛒 <span className="nav-text">{t('nav.shop')}</span>
           </button>
-          <button
-            className={`nav-link ${currentView === 'admin' ? 'active' : ''} ${!isAdmin ? 'nav-link-locked' : ''}`}
-            onClick={() => {
-              sound.click();
-              if (!isAdmin) {
-                showToast(t('nav.adminWarning'), 'warning');
-                openAuth('login');
-              } else {
+          {isAdmin && (
+            <button
+              className={`nav-link ${currentView === 'admin' ? 'active' : ''}`}
+              onClick={() => {
+                sound.click();
                 setView('admin');
-              }
-            }}
-            title={isAdmin ? "Trang quản trị hệ thống" : "Đăng nhập admin để mở khóa"}
-          >
-            ⚙️ <span className="nav-text">{t('nav.admin')}</span>
-            {!isAdmin && <span className="lock-pill">{t('nav.locked')}</span>}
-          </button>
+              }}
+              title="Trang quản trị hệ thống"
+            >
+              ⚙️ <span className="nav-text">{t('nav.admin')}</span>
+            </button>
+          )}
         </nav>
 
         <div className="header-actions">
@@ -113,22 +109,12 @@ export default function Navbar({ currentView, setView, openAuth, openUpload, sho
           </button>
 
           {/* Sound Toggle */}
-          <button className="btn btn-icon sound-btn" onClick={toggleSound} title="Bật/Tắt âm thanh">
-            {soundActive ? '🔊' : '🔇'} <span className="nav-text">{soundActive ? t('nav.soundOn') : t('nav.soundOff')}</span>
+          <button className="btn btn-icon sound-btn" onClick={toggleSound} title={soundActive ? t('nav.soundOn') : t('nav.soundOff')}>
+            {soundActive ? '🔊' : '🔇'}
           </button>
 
           {!user ? (
             <div className="auth-buttons">
-              <button
-                className="btn btn-demo-quick btn-sm"
-                onClick={() => {
-                  sound.click();
-                  openAuth('login');
-                }}
-                title="Đăng nhập nhanh tài khoản mẫu chấm điểm: admin / 123456"
-              >
-                {t('nav.demoAdmin')}
-              </button>
               <button className="btn btn-outline btn-sm" onClick={() => openAuth('login')}>{t('nav.login')}</button>
               <button className="btn btn-primary btn-sm" onClick={() => openAuth('register')}>{t('nav.register')}</button>
             </div>

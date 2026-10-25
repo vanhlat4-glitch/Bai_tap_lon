@@ -9,6 +9,18 @@
   padding: 0;
 }
 
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
 html[data-theme="light"] {
   color-scheme: light;
 }
