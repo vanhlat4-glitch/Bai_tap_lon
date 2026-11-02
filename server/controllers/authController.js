@@ -42,39 +42,7 @@ exports.register = async (req, res, next) => {
     // Role setup: 'admin' if username is 'admin', otherwise 'user'
     const role = cleanUsername.toLowerCase() === 'admin' ? 'admin' : 'user';
 
-    // If MongoDB is connected via Mongoose (Lesson 4)
-    if (getIsConnected()) {
-      const existing = await User.findOne({ username: new RegExp(`^${cleanUsername}$`, 'i') });
-      if (existing) {
-        return res.status(400).json({ success: false, error: 'Tên tài khoản này đã được sử dụng!' });
-      }
-
-      const newUser = await User.create({
-        username: cleanUsername,
-        password, // Pre-save hook hashes with bcrypt (Lesson 7)
-        role,
-        coins: 100,
-        avatar: '🎮',
-        badge: 'Tân thủ'
-      });
-
-      const token = generateToken(newUser);
-      return res.status(201).json({
-        success: true,
-        message: 'Đăng ký thành công! Bạn nhận được 100 Xu tân thủ!',
-        token,
-        user: {
-          id: newUser._id,
-          username: newUser.username,
-          role: newUser.role,
-          coins: newUser.coins,
-          avatar: newUser.avatar,
-          badge: newUser.badge
-        }
-      });
-    }
-
-    // High performance database engine fallback
+    // High performance database engine
     const existingUser = db.prepare('SELECT id FROM users WHERE username = ? COLLATE NOCASE').get(cleanUsername);
     if (existingUser) {
       return res.status(400).json({ success: false, error: 'Tên tài khoản này đã được sử dụng!' });
@@ -88,6 +56,20 @@ exports.register = async (req, res, next) => {
 
     const userId = Number(result.lastInsertRowid);
     db.prepare('INSERT OR IGNORE INTO daily_wheel (user_id, last_free_spin, total_spins) VALUES (?, NULL, 0)').run(userId);
+
+    // Sync to MongoDB if connected via Mongoose (Lesson 4)
+    if (getIsConnected()) {
+      try {
+        await User.create({
+          username: cleanUsername,
+          password,
+          role,
+          coins: 100,
+          avatar: '🎮',
+          badge: 'Tân thủ'
+        });
+      } catch (e) {}
+    }
 
     const token = generateToken({ id: userId, username: cleanUsername, role });
 
@@ -121,33 +103,25 @@ exports.login = async (req, res, next) => {
     }
 
     const cleanUsername = username.trim();
+    let user = db.prepare('SELECT * FROM users WHERE username = ? COLLATE NOCASE').get(cleanUsername);
 
-    if (getIsConnected()) {
-      const user = await User.findOne({ username: new RegExp(`^${cleanUsername}$`, 'i') });
-      if (user) {
-        const isMatch = await user.comparePassword(password);
-        if (!isMatch) {
+    if (!user && getIsConnected()) {
+      const mongoUser = await User.findOne({ username: new RegExp(`^${cleanUsername}$`, 'i') });
+      if (mongoUser) {
+        const isMongoMatch = await mongoUser.comparePassword(password);
+        if (!isMongoMatch) {
           return res.status(400).json({ success: false, error: 'Tài khoản hoặc mật khẩu không chính xác!' });
         }
-
-        const token = generateToken(user);
-        return res.json({
-          success: true,
-          message: 'Đăng nhập thành công (Mongoose)!',
-          token,
-          user: {
-            id: user._id,
-            username: user.username,
-            role: user.role,
-            coins: user.coins,
-            avatar: user.avatar,
-            badge: user.badge
-          }
-        });
+        const resInsert = db.prepare(`
+          INSERT INTO users (username, password_hash, coins, avatar, badge) 
+          VALUES (?, ?, ?, ?, ?)
+        `).run(mongoUser.username, mongoUser.password, mongoUser.coins ?? 100, mongoUser.avatar || '🎮', mongoUser.badge || 'Tân thủ');
+        const uid = Number(resInsert.lastInsertRowid);
+        db.prepare('INSERT OR IGNORE INTO daily_wheel (user_id, last_free_spin, total_spins) VALUES (?, NULL, 0)').run(uid);
+        user = db.prepare('SELECT * FROM users WHERE id = ?').get(uid);
       }
     }
 
-    const user = db.prepare('SELECT * FROM users WHERE username = ? COLLATE NOCASE').get(cleanUsername);
     if (!user) {
       return res.status(400).json({ success: false, error: 'Tài khoản hoặc mật khẩu không chính xác!' });
     }

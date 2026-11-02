@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { loginUser, registerUser } from '../features/auth/authSlice';
+import { loginUser, registerUser, fetchMe } from '../features/auth/authSlice';
 import { sound } from '../utils/sound';
 
-export default function AuthPage({ showToast }) {
+export default function AuthPage({ showToast, setView }) {
   const dispatch = useDispatch();
   const { loading, error } = useSelector(state => state.auth);
 
@@ -42,13 +42,15 @@ export default function AuthPage({ showToast }) {
     const result = await dispatch(action({ username: username.trim(), password }));
 
     if (!result.error) {
+      dispatch(fetchMe());
       sound.win();
       showToast(
         mode === 'login'
-          ? `Xin chào ${username}! Đăng nhập thành công.`
+          ? `Xin chào ${username.trim()}! Đăng nhập thành công.`
           : 'Tạo tài khoản thành công! Bạn nhận được 100 Xu tân thủ.',
         'success'
       );
+      if (setView) setView('games');
     } else {
       sound.gameOver();
       showToast(result.payload || 'Đăng nhập không thành công', 'error');

@@ -108,7 +108,25 @@ function initSqlite() {
 
 initSqlite();
 
-// Auto seed MongoDB (Lesson 4)
+// Ensure a user exists in SQLite (syncing from MongoDB or token when needed)
+function ensureSqliteUser({ username, passwordHash, coins = 100, avatar = '🎮', badge = 'Tân thủ' }) {
+  if (!username) return null;
+  const cleanUsername = username.trim();
+  let user = sqliteDb.prepare('SELECT * FROM users WHERE username = ? COLLATE NOCASE').get(cleanUsername);
+  if (!user) {
+    const hash = passwordHash || bcrypt.hashSync('123456', 10);
+    const res = sqliteDb.prepare(`
+      INSERT INTO users (username, password_hash, coins, avatar, badge)
+      VALUES (?, ?, ?, ?, ?)
+    `).run(cleanUsername, hash, coins ?? 100, avatar || '🎮', badge || 'Tân thủ');
+    const userId = Number(res.lastInsertRowid);
+    sqliteDb.prepare('INSERT OR IGNORE INTO daily_wheel (user_id, last_free_spin, total_spins) VALUES (?, NULL, 0)').run(userId);
+    user = sqliteDb.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+  }
+  return user;
+}
+
+// Auto seed MongoDB (Lesson 4) & sync existing MongoDB users to SQLite
 async function seedMongo() {
   try {
     const User = require('../models/User');
@@ -152,6 +170,18 @@ async function seedMongo() {
 
       console.log('MongoDB demo data seeded successfully!');
     }
+
+    // Sync all MongoDB users into SQLite so IDs and foreign keys always work seamlessly
+    const mongoUsers = await User.find({});
+    for (const mu of mongoUsers) {
+      ensureSqliteUser({
+        username: mu.username,
+        passwordHash: mu.password,
+        coins: mu.coins,
+        avatar: mu.avatar,
+        badge: mu.badge
+      });
+    }
   } catch (err) {
     console.error('Error seeding MongoDB:', err);
   }
@@ -179,5 +209,6 @@ function getIsConnected() {
 module.exports = {
   connectDB,
   getIsConnected,
-  sqliteDb
+  sqliteDb,
+  ensureSqliteUser
 };

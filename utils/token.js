@@ -4,14 +4,14 @@ const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_jwt_minigame_key_2026_mindx';
 const REFRESH_SECRET = process.env.REFRESH_SECRET || 'super_secret_refresh_token_key_2026_mindx';
 
-// Generate Access Token (Short-lived, e.g. 15m - 2h)
+// Generate Access Token
 function generateAccessToken(user) {
   const payload = {
     id: user.id || user._id,
     username: user.username,
     role: user.role || 'user'
   };
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: '2h' });
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '7d' });
 }
 
 // Generate Refresh Token (Long-lived, e.g. 7d)

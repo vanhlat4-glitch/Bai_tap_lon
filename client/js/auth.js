@@ -18,7 +18,7 @@ class AuthManager {
   }
 
   isLoggedIn() {
-    return !!this.currentUser;
+    return !!(this.currentUser || api.getToken());
   }
 
   async checkAuth() {
@@ -38,9 +38,12 @@ class AuthManager {
       this.notify();
       return this.currentUser;
     } catch (err) {
-      console.warn('Token expired or invalid, logging out:', err.message);
-      this.logout();
-      return null;
+      console.warn('Token check failed:', err.message);
+      if (!this.currentUser) {
+        api.setToken(null);
+        this.notify();
+      }
+      return this.currentUser;
     }
   }
 
@@ -48,7 +51,19 @@ class AuthManager {
     const data = await api.login(username, password);
     api.setToken(data.token);
     this.currentUser = data.user;
-    await this.checkAuth();
+    this.notify();
+    try {
+      const me = await api.getMe();
+      if (me && me.user) {
+        this.currentUser = me.user;
+        this.userStats = me.stats;
+        this.inventory = me.inventory || [];
+        this.wheelStatus = me.wheel || null;
+        this.notify();
+      }
+    } catch (e) {
+      // Keep logged-in user from login response
+    }
     if (window.sound) window.sound.coin();
     return data;
   }
@@ -57,7 +72,19 @@ class AuthManager {
     const data = await api.register(username, password);
     api.setToken(data.token);
     this.currentUser = data.user;
-    await this.checkAuth();
+    this.notify();
+    try {
+      const me = await api.getMe();
+      if (me && me.user) {
+        this.currentUser = me.user;
+        this.userStats = me.stats;
+        this.inventory = me.inventory || [];
+        this.wheelStatus = me.wheel || null;
+        this.notify();
+      }
+    } catch (e) {
+      // Keep registered user from register response
+    }
     if (window.sound) window.sound.win();
     return data;
   }

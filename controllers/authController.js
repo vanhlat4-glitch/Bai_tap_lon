@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const { sqliteDb, getIsConnected } = require('../database/db');
+const { sqliteDb, getIsConnected, ensureSqliteUser } = require('../database/db');
 const User = require('../models/User');
 const { generateAccessToken, generateRefreshToken, verifyRefreshToken } = require('../utils/token');
 
@@ -9,8 +9,9 @@ function recordLoginLog(userId, username, status, req) {
   try {
     const ip = req.ip || req.headers['x-forwarded-for'] || req.socket?.remoteAddress || '127.0.0.1';
     const userAgent = (req.headers['user-agent'] || 'Unknown').substring(0, 150);
+    const validUserId = typeof userId === 'number' ? userId : null;
     db.prepare('INSERT INTO login_logs (user_id, username, status, ip, user_agent) VALUES (?, ?, ?, ?, ?)').run(
-      userId || null,
+      validUserId,
       username || 'Unknown',
       status,
       ip,
@@ -45,47 +46,29 @@ exports.register = async (req, res, next) => {
     // Role setup: 'admin' if username is 'admin', otherwise 'user'
     const role = cleanUsername.toLowerCase() === 'admin' ? 'admin' : 'user';
 
-    // If MongoDB is connected via Mongoose (Lesson 4)
-    if (getIsConnected()) {
-      const existing = await User.findOne({ username: new RegExp(`^${cleanUsername}$`, 'i') });
-      if (existing) {
-        return res.status(400).json({ success: false, error: 'Tên tài khoản này đã được sử dụng!' });
-      }
-
-      const newUser = await User.create({
-        username: cleanUsername,
-        password, // Pre-save hook hashes with bcrypt (Lesson 7)
-        role,
-        coins: 100,
-        avatar: '🎮',
-        badge: 'Tân thủ'
-      });
-
-      const token = generateAccessToken(newUser);
-      const refreshToken = generateRefreshToken(newUser);
-      recordLoginLog(newUser._id, cleanUsername, 'registered', req);
-      return res.status(201).json({
-        success: true,
-        message: 'Đăng ký thành công! Bạn nhận được 100 Xu tân thủ!',
-        token,
-        refreshToken,
-        user: {
-          id: newUser._id,
-          username: newUser.username,
-          role: newUser.role,
-          coins: newUser.coins,
-          avatar: newUser.avatar,
-          badge: newUser.badge
-        }
-      });
-    }
-
-    // High performance database engine fallback
-    const existingUser = db.prepare('SELECT id FROM users WHERE username = ? COLLATE NOCASE').get(cleanUsername);
-    if (existingUser) {
+    // Check existing in SQLite
+    const existingSqlite = db.prepare('SELECT id FROM users WHERE username = ? COLLATE NOCASE').get(cleanUsername);
+    if (existingSqlite) {
       return res.status(400).json({ success: false, error: 'Tên tài khoản này đã được sử dụng!' });
     }
 
+    // Check existing in MongoDB if connected (Lesson 4)
+    if (getIsConnected()) {
+      const existingMongo = await User.findOne({ username: new RegExp(`^${cleanUsername}$`, 'i') });
+      if (existingMongo) {
+        // Sync existing Mongo user into SQLite so they can log in right away
+        ensureSqliteUser({
+          username: existingMongo.username,
+          passwordHash: existingMongo.password,
+          coins: existingMongo.coins,
+          avatar: existingMongo.avatar,
+          badge: existingMongo.badge
+        });
+        return res.status(400).json({ success: false, error: 'Tên tài khoản này đã được sử dụng!' });
+      }
+    }
+
+    // Insert into SQLite (primary relational engine for games, wheel, shop, leaderboard)
     const hash = bcrypt.hashSync(password, 10);
     const result = db.prepare(`
       INSERT INTO users (username, password_hash, coins, avatar, badge) 
@@ -94,6 +77,23 @@ exports.register = async (req, res, next) => {
 
     const userId = Number(result.lastInsertRowid);
     db.prepare('INSERT OR IGNORE INTO daily_wheel (user_id, last_free_spin, total_spins) VALUES (?, NULL, 0)').run(userId);
+
+    // Sync to MongoDB if connected (Lesson 4)
+    if (getIsConnected()) {
+      try {
+        await User.create({
+          username: cleanUsername,
+          password, // Pre-save hook hashes with bcrypt (Lesson 7)
+          role,
+          coins: 100,
+          avatar: '🎮',
+          badge: 'Tân thủ'
+        });
+      } catch (e) {
+        // Ignore duplicate/mongo sync errors
+      }
+    }
+
     recordLoginLog(userId, cleanUsername, 'registered', req);
 
     const token = generateAccessToken({ id: userId, username: cleanUsername, role });
@@ -130,43 +130,41 @@ exports.login = async (req, res, next) => {
     }
 
     const cleanUsername = username.trim();
+    let user = db.prepare('SELECT * FROM users WHERE username = ? COLLATE NOCASE').get(cleanUsername);
 
-    if (getIsConnected()) {
-      const user = await User.findOne({ username: new RegExp(`^${cleanUsername}$`, 'i') });
-      if (user) {
-        const isMatch = await user.comparePassword(password);
-        if (!isMatch) {
+    // If user is not in SQLite yet, check MongoDB and sync to SQLite
+    if (!user && getIsConnected()) {
+      const mongoUser = await User.findOne({ username: new RegExp(`^${cleanUsername}$`, 'i') });
+      if (mongoUser) {
+        const isMongoMatch = await mongoUser.comparePassword(password);
+        if (!isMongoMatch) {
           recordLoginLog(null, cleanUsername, 'failed', req);
           return res.status(400).json({ success: false, error: 'Tài khoản hoặc mật khẩu không chính xác!' });
         }
-
-        recordLoginLog(user._id, cleanUsername, 'success', req);
-        const token = generateAccessToken(user);
-        const refreshToken = generateRefreshToken(user);
-        return res.json({
-          success: true,
-          message: 'Đăng nhập thành công (Mongoose)!',
-          token,
-          refreshToken,
-          user: {
-            id: user._id,
-            username: user.username,
-            role: user.role,
-            coins: user.coins,
-            avatar: user.avatar,
-            badge: user.badge
-          }
+        user = ensureSqliteUser({
+          username: mongoUser.username,
+          passwordHash: mongoUser.password,
+          coins: mongoUser.coins,
+          avatar: mongoUser.avatar,
+          badge: mongoUser.badge
         });
       }
     }
 
-    const user = db.prepare('SELECT * FROM users WHERE username = ? COLLATE NOCASE').get(cleanUsername);
     if (!user) {
       recordLoginLog(null, cleanUsername, 'failed', req);
       return res.status(400).json({ success: false, error: 'Tài khoản hoặc mật khẩu không chính xác!' });
     }
 
-    const isMatch = bcrypt.compareSync(password, user.password_hash);
+    let isMatch = bcrypt.compareSync(password, user.password_hash);
+    if (!isMatch && getIsConnected()) {
+      const mongoUser = await User.findOne({ username: new RegExp(`^${cleanUsername}$`, 'i') });
+      if (mongoUser && (await mongoUser.comparePassword(password))) {
+        isMatch = true;
+        db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(mongoUser.password, user.id);
+      }
+    }
+
     if (!isMatch) {
       recordLoginLog(null, cleanUsername, 'failed', req);
       return res.status(400).json({ success: false, error: 'Tài khoản hoặc mật khẩu không chính xác!' });
@@ -202,7 +200,10 @@ exports.login = async (req, res, next) => {
 exports.getMe = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const user = db.prepare('SELECT id, username, coins, avatar, badge, created_at FROM users WHERE id = ?').get(userId);
+    let user = db.prepare('SELECT id, username, coins, avatar, badge, created_at FROM users WHERE id = ?').get(userId);
+    if (!user && req.user.username) {
+      user = ensureSqliteUser({ username: req.user.username });
+    }
     if (!user) {
       return res.status(404).json({ success: false, error: 'Người dùng không tồn tại!' });
     }

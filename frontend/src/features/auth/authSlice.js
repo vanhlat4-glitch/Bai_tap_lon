@@ -45,10 +45,14 @@ export const fetchMe = createAsyncThunk('auth/fetchMe', async (_, { rejectWithVa
       headers: { 'Authorization': `Bearer ${token}` }
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
+    if (!res.ok) {
+      if (res.status === 401 || res.status === 403) {
+        localStorage.removeItem('minigame_token');
+      }
+      throw new Error(data.error);
+    }
     return data;
   } catch (err) {
-    localStorage.removeItem('minigame_token');
     return rejectWithValue(err.message);
   }
 });
@@ -167,8 +171,10 @@ const authSlice = createSlice({
       })
       .addCase(fetchMe.rejected, (state) => {
         state.initializing = false;
-        state.user = null;
-        state.token = null;
+        if (!getStoredToken()) {
+          state.user = null;
+          state.token = null;
+        }
       })
       // UploadAvatar
       .addCase(uploadAvatar.fulfilled, (state, action) => {

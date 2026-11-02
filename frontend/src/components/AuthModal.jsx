@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { loginUser, registerUser } from '../features/auth/authSlice';
+import { loginUser, registerUser, fetchMe } from '../features/auth/authSlice';
 import { useThemeLang } from '../context/ThemeLanguageContext';
 import { sound } from '../utils/sound';
 
-export default function AuthModal({ isOpen, onClose, initialMode = 'login', showToast }) {
+export default function AuthModal({ isOpen, onClose, initialMode = 'login', showToast, onSuccess }) {
   const dispatch = useDispatch();
   const { loading, error } = useSelector(state => state.auth);
   const { lang, t } = useThemeLang();
@@ -13,6 +13,12 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', show
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+
+  useEffect(() => {
+    if (isOpen) {
+      setMode(initialMode);
+    }
+  }, [isOpen, initialMode]);
 
   if (!isOpen) return null;
 
@@ -30,17 +36,19 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', show
     }
 
     const action = mode === 'login' ? loginUser : registerUser;
-    const result = await dispatch(action({ username, password }));
+    const result = await dispatch(action({ username: username.trim(), password }));
 
     if (!result.error) {
+      dispatch(fetchMe());
       sound.win();
       showToast(
         mode === 'login'
-          ? (lang === 'vi' ? `Chào mừng ${username} trở lại!` : `Welcome back ${username}!`)
+          ? (lang === 'vi' ? `Chào mừng ${username.trim()} trở lại!` : `Welcome back ${username.trim()}!`)
           : (lang === 'vi' ? 'Đăng ký thành công! Nhận 100 Xu!' : 'Registered successfully! Received 100 Coins!'),
         'success'
       );
       onClose();
+      if (onSuccess) onSuccess();
       setUsername('');
       setPassword('');
       setConfirmPassword('');

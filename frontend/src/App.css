@@ -1286,7 +1286,10 @@ body {
   line-height: 0;
 }
 
-#snakeCanvas {
+#snakeCanvas,
+.snake-canvas-wrapper canvas,
+#wheelCanvas,
+.wheel-box canvas {
   display: block;
   max-width: 100%;
   height: auto;
@@ -1424,8 +1427,9 @@ body {
   border: 2px solid rgba(245, 158, 11, 0.4);
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
   width: 380px;
-  height: 380px;
   max-width: 100%;
+  aspect-ratio: 1 / 1;
+  touch-action: none;
 }
 
 .g2048-board {
@@ -1871,6 +1875,8 @@ body {
   padding: 2.25rem;
   max-width: 440px;
   width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
   position: relative;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 40px rgba(56, 189, 248, 0.15);
   animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);

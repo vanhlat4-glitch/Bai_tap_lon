@@ -10,5 +10,4 @@ server/data/
 *.sqlite
 .DS_Store
 Thumbs.db
-frontend/dist/
 frontend/node_modules/

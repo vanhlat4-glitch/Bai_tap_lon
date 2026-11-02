@@ -62,9 +62,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Check login state
   await auth.checkAuth();
-  if (!auth.isLoggedIn()) {
-    openAuthModal('login');
-  }
 
   // Initialize Submodules
   if (window.caroGame) window.caroGame.init();
@@ -139,9 +136,12 @@ function setupNavigation() {
   });
 }
 
+let pendingViewAfterAuth = null;
+
 function switchView(viewId) {
-  if (!auth.isLoggedIn()) {
-    showToast('Vui lòng đăng nhập trước khi chơi!', 'warning');
+  if (viewId === 'admin' && !auth.isLoggedIn()) {
+    pendingViewAfterAuth = viewId;
+    showToast('Vui lòng đăng nhập tài khoản Admin!', 'warning');
     openAuthModal('login');
     return;
   }
@@ -156,9 +156,15 @@ function switchView(viewId) {
   if (activeNav) activeNav.classList.add('active');
 
   if (window.sound) window.sound.click();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 
   // View specific refresh
-  if (viewId === 'leaderboard' && window.leaderboardManager) {
+  if (viewId === 'games') {
+    const activeTab = document.querySelector('.game-tab-btn.active');
+    const game = activeTab ? activeTab.dataset.game : 'caro';
+    if (game === 'snake' && window.snakeGame) window.snakeGame.draw();
+    if (game === 'caro' && window.caroGame) window.caroGame.renderBoard();
+  } else if (viewId === 'leaderboard' && window.leaderboardManager) {
     window.leaderboardManager.loadLeaderboard(window.leaderboardManager.currentGame);
   } else if (viewId === 'shop' && window.shopManager) {
     window.shopManager.render();
@@ -224,6 +230,12 @@ function setupAuthModals() {
         showToast(`Chào mừng trở lại, ${u}!`, 'success');
         if (window.shopManager) window.shopManager.render();
         if (window.leaderboardManager) window.leaderboardManager.loadLeaderboard(window.leaderboardManager.currentGame);
+        if (window.luckyWheel) window.luckyWheel.updateStatus();
+        if (pendingViewAfterAuth) {
+          const target = pendingViewAfterAuth;
+          pendingViewAfterAuth = null;
+          switchView(target);
+        }
       } catch (err) {
         showToast(err.message, 'error');
       }
@@ -249,6 +261,12 @@ function setupAuthModals() {
         registerForm.reset();
         showToast(`Đăng ký thành công! Nhận ngay 100 Xu!`, 'success');
         if (window.shopManager) window.shopManager.render();
+        if (window.luckyWheel) window.luckyWheel.updateStatus();
+        if (pendingViewAfterAuth) {
+          const target = pendingViewAfterAuth;
+          pendingViewAfterAuth = null;
+          switchView(target);
+        }
       } catch (err) {
         showToast(err.message, 'error');
       }

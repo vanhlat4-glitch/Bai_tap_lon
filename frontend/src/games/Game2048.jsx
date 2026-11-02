@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { submitGameScore } from '../features/games/gamesSlice';
 import { updateCoins } from '../features/auth/authSlice';
@@ -11,6 +11,8 @@ export default function Game2048({ showToast }) {
   const [bestScore, setBestScore] = useState(() => parseInt(localStorage.getItem('2048_bestscore') || '0', 10));
   const [isOver, setIsOver] = useState(false);
   const [prevState, setPrevState] = useState(null);
+  const touchStartRef = useRef({ x: 0, y: 0 });
+  const moveRef = useRef(null);
 
   const initGame = () => {
     let newGrid = Array(4).fill(null).map(() => Array(4).fill(0));
@@ -139,10 +141,49 @@ export default function Game2048({ showToast }) {
     showToast('Đã hoàn tác 1 nước đi!', 'info');
   };
 
+  moveRef.current = move;
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+        e.preventDefault();
+      }
+      if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') moveRef.current?.('up');
+      else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') moveRef.current?.('down');
+      else if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') moveRef.current?.('left');
+      else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') moveRef.current?.('right');
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const handleTouchStart = (e) => {
+    if (e.touches.length === 1) {
+      touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    }
+  };
+
+  const handleTouchEnd = (e) => {
+    if (e.changedTouches.length === 1) {
+      const dx = e.changedTouches[0].clientX - touchStartRef.current.x;
+      const dy = e.changedTouches[0].clientY - touchStartRef.current.y;
+      const absX = Math.abs(dx);
+      const absY = Math.abs(dy);
+      if (Math.max(absX, absY) > 30) {
+        if (absX > absY) move(dx > 0 ? 'right' : 'left');
+        else move(dy > 0 ? 'down' : 'up');
+      }
+    }
+  };
+
   return (
     <div className="game-arena-layout">
       <div className="game-main-panel">
-        <div className="g2048-board-wrapper">
+        <div
+          className="g2048-board-wrapper"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
           <div className="g2048-board">
             {grid.map((row, r) =>
               row.map((val, c) => (
