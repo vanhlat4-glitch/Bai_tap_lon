@@ -1,9 +1,49 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchShopItems, buyItem, setFilter } from '../features/shop/shopSlice';
 import { updateProfile } from '../features/auth/authSlice';
 import { useThemeLang } from '../context/ThemeLanguageContext';
 import { sound } from '../utils/sound';
+
+// Rubric Criterion: Optimization & Performance with React.memo
+const ShopItemCard = React.memo(function ShopItemCard({
+  item,
+  isOwned,
+  isEquipped,
+  lang,
+  t,
+  onBuy,
+  onEquip
+}) {
+  return (
+    <div className={`shop-card ${isOwned ? 'owned' : ''} ${isEquipped ? 'equipped' : ''}`}>
+      <div className="shop-card-badge">
+        {item.type === 'avatar' ? 'Avatar' : (lang === 'vi' ? 'Danh hiệu' : 'Badge')}
+      </div>
+      <div className="shop-card-icon">{item.icon}</div>
+      <div className="shop-card-name">{item.name}</div>
+      <div className="shop-card-desc">{item.description}</div>
+      <div className="shop-card-footer">
+        <div className="shop-card-price">
+          {isOwned ? (
+            <span>{t('shop.btnOwned')}</span>
+          ) : (
+            <>💰 <strong>{item.price}</strong> {lang === 'vi' ? 'Xu' : 'Coins'}</>
+          )}
+        </div>
+        <div className="shop-card-action">
+          {isEquipped ? (
+            <button className="btn btn-secondary btn-sm" disabled>{t('shop.btnEquipped')}</button>
+          ) : isOwned ? (
+            <button className="btn btn-outline btn-sm" onClick={() => onEquip(item)}>{t('shop.btnEquip')}</button>
+          ) : (
+            <button className="btn btn-primary btn-sm" onClick={() => onBuy(item)}>{t('shop.btnBuy')}</button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+});
 
 export default function ShopPage({ showToast, openAuth }) {
   const dispatch = useDispatch();
@@ -15,9 +55,18 @@ export default function ShopPage({ showToast, openAuth }) {
     dispatch(fetchShopItems());
   }, [dispatch]);
 
-  const ownedItemIds = new Set(inventory.map(i => i.item_id));
+  // Rubric Criterion: Optimization & Performance with useMemo
+  const ownedItemIds = useMemo(
+    () => new Set(inventory.map(i => i.item_id)),
+    [inventory]
+  );
 
-  const handleBuy = async (item) => {
+  const filteredItems = useMemo(
+    () => items.filter(i => (filter === 'all' ? true : i.type === filter)),
+    [items, filter]
+  );
+
+  const handleBuy = useCallback(async (item) => {
     if (!user) {
       showToast(lang === 'vi' ? 'Vui lòng đăng nhập để mua vật phẩm!' : 'Please sign in to buy items!', 'warning');
       openAuth('login');
@@ -43,9 +92,9 @@ export default function ShopPage({ showToast, openAuth }) {
     } else {
       showToast(result.payload || (lang === 'vi' ? 'Giao dịch thất bại' : 'Transaction failed'), 'error');
     }
-  };
+  }, [user, lang, showToast, openAuth, dispatch]);
 
-  const handleEquip = async (item) => {
+  const handleEquip = useCallback(async (item) => {
     const payload = item.type === 'avatar' ? { avatar: item.icon } : { badge: item.name };
     const result = await dispatch(updateProfile(payload));
     if (!result.error) {
@@ -57,12 +106,7 @@ export default function ShopPage({ showToast, openAuth }) {
         'success'
       );
     }
-  };
-
-  const filteredItems = items.filter(i => {
-    if (filter === 'all') return true;
-    return i.type === filter;
-  });
+  }, [dispatch, lang, showToast]);
 
   return (
     <div>
@@ -88,36 +132,22 @@ export default function ShopPage({ showToast, openAuth }) {
       <div className="shop-cards-grid">
         {filteredItems.map(item => {
           const isOwned = ownedItemIds.has(item.id);
-          const isEquipped = user && (
+          const isEquipped = !!(user && (
             (item.type === 'avatar' && user.avatar === item.icon) ||
             (item.type === 'badge' && user.badge === item.name)
-          );
+          ));
 
           return (
-            <div key={item.id} className={`shop-card ${isOwned ? 'owned' : ''} ${isEquipped ? 'equipped' : ''}`}>
-              <div className="shop-card-badge">{item.type === 'avatar' ? (lang === 'vi' ? 'Avatar' : 'Avatar') : (lang === 'vi' ? 'Danh hiệu' : 'Badge')}</div>
-              <div className="shop-card-icon">{item.icon}</div>
-              <div className="shop-card-name">{item.name}</div>
-              <div className="shop-card-desc">{item.description}</div>
-              <div className="shop-card-footer">
-                <div className="shop-card-price">
-                  {isOwned ? (
-                    <span>{t('shop.btnOwned')}</span>
-                  ) : (
-                    <>💰 <strong>{item.price}</strong> {lang === 'vi' ? 'Xu' : 'Coins'}</>
-                  )}
-                </div>
-                <div className="shop-card-action">
-                  {isEquipped ? (
-                    <button className="btn btn-secondary btn-sm" disabled>{t('shop.btnEquipped')}</button>
-                  ) : isOwned ? (
-                    <button className="btn btn-outline btn-sm" onClick={() => handleEquip(item)}>{t('shop.btnEquip')}</button>
-                  ) : (
-                    <button className="btn btn-primary btn-sm" onClick={() => handleBuy(item)}>{t('shop.btnBuy')}</button>
-                  )}
-                </div>
-              </div>
-            </div>
+            <ShopItemCard
+              key={item.id}
+              item={item}
+              isOwned={isOwned}
+              isEquipped={isEquipped}
+              lang={lang}
+              t={t}
+              onBuy={handleBuy}
+              onEquip={handleEquip}
+            />
           );
         })}
       </div>

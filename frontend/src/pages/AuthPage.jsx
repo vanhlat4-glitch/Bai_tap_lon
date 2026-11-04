@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
 import { loginUser, registerUser, fetchMe } from '../features/auth/authSlice';
 import { sound } from '../utils/sound';
 
@@ -8,53 +10,64 @@ export default function AuthPage({ showToast, setView }) {
   const { loading, error } = useSelector(state => state.auth);
 
   const [mode, setMode] = useState('login'); // 'login' | 'register'
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+
+  const validationSchema = useMemo(() => {
+    const schema = {
+      username: Yup.string()
+        .trim()
+        .min(3, 'Tên tài khoản cần từ 3 đến 20 ký tự!')
+        .max(20, 'Tên tài khoản cần từ 3 đến 20 ký tự!')
+        .required('Vui lòng nhập tên tài khoản!'),
+      password: Yup.string()
+        .min(6, 'Mật khẩu cần tối thiểu 6 ký tự!')
+        .required('Vui lòng nhập mật khẩu!')
+    };
+    if (mode === 'register') {
+      schema.confirmPassword = Yup.string()
+        .oneOf([Yup.ref('password')], 'Mật khẩu xác nhận không khớp!')
+        .required('Vui lòng nhập lại mật khẩu xác nhận!');
+    }
+    return Yup.object(schema);
+  }, [mode]);
+
+  const formik = useFormik({
+    initialValues: {
+      username: '',
+      password: '',
+      confirmPassword: ''
+    },
+    validationSchema,
+    onSubmit: async (values, { resetForm }) => {
+      const cleanUser = values.username.trim();
+      const action = mode === 'login' ? loginUser : registerUser;
+      const result = await dispatch(action({ username: cleanUser, password: values.password }));
+
+      if (!result.error) {
+        dispatch(fetchMe());
+        sound.win();
+        showToast(
+          mode === 'login'
+            ? `Xin chào ${cleanUser}! Đăng nhập thành công.`
+            : 'Tạo tài khoản thành công! Bạn nhận được 100 Xu tân thủ.',
+          'success'
+        );
+        resetForm();
+        if (setView) setView('games');
+      } else {
+        sound.gameOver();
+        showToast(result.payload || 'Đăng nhập không thành công', 'error');
+      }
+    }
+  });
 
   const handleQuickDemo = () => {
-    setUsername('admin');
-    setPassword('123456');
+    formik.setValues({
+      username: 'admin',
+      password: '123456',
+      confirmPassword: ''
+    });
     sound.click();
     showToast('Đã điền tài khoản mẫu (admin / 123456)', 'info');
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!username.trim() || !password.trim()) {
-      showToast('Vui lòng nhập đầy đủ tên tài khoản và mật khẩu!', 'warning');
-      return;
-    }
-
-    if (mode === 'register') {
-      if (password !== confirmPassword) {
-        showToast('Mật khẩu xác nhận không khớp!', 'warning');
-        return;
-      }
-      if (password.length < 6) {
-        showToast('Mật khẩu cần tối thiểu 6 ký tự!', 'warning');
-        return;
-      }
-    }
-
-    const action = mode === 'login' ? loginUser : registerUser;
-    const result = await dispatch(action({ username: username.trim(), password }));
-
-    if (!result.error) {
-      dispatch(fetchMe());
-      sound.win();
-      showToast(
-        mode === 'login'
-          ? `Xin chào ${username.trim()}! Đăng nhập thành công.`
-          : 'Tạo tài khoản thành công! Bạn nhận được 100 Xu tân thủ.',
-        'success'
-      );
-      if (setView) setView('games');
-    } else {
-      sound.gameOver();
-      showToast(result.payload || 'Đăng nhập không thành công', 'error');
-    }
   };
 
   return (
@@ -114,14 +127,14 @@ export default function AuthPage({ showToast, setView }) {
             <button
               type="button"
               className={`auth-mode-tab ${mode === 'login' ? 'active' : ''}`}
-              onClick={() => { sound.click(); setMode('login'); }}
+              onClick={() => { sound.click(); setMode('login'); formik.setErrors({}); }}
             >
               🔑 Đăng Nhập
             </button>
             <button
               type="button"
               className={`auth-mode-tab ${mode === 'register' ? 'active' : ''}`}
-              onClick={() => { sound.click(); setMode('register'); }}
+              onClick={() => { sound.click(); setMode('register'); formik.setErrors({}); }}
             >
               📝 Đăng Ký Mới
             </button>
@@ -144,21 +157,26 @@ export default function AuthPage({ showToast, setView }) {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="auth-form-body">
+        <form onSubmit={formik.handleSubmit} className="auth-form-body" noValidate>
           <div className="auth-field-group">
             <label className="auth-field-label">Tên tài khoản</label>
             <div className="auth-input-wrapper">
               <span className="auth-input-icon">👤</span>
               <input
                 type="text"
+                name="username"
                 className="auth-text-input"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                value={formik.values.username}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
                 placeholder="Ví dụ: player1, dragon..."
                 required
                 autoFocus
               />
             </div>
+            {formik.touched.username && formik.errors.username && (
+              <small style={{ color: '#fb7185', fontSize: '0.8rem' }}>{formik.errors.username}</small>
+            )}
           </div>
 
           <div className="auth-field-group">
@@ -167,13 +185,18 @@ export default function AuthPage({ showToast, setView }) {
               <span className="auth-input-icon">🔒</span>
               <input
                 type="password"
+                name="password"
                 className="auth-text-input"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={formik.values.password}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
                 placeholder="Tối thiểu 6 ký tự"
                 required
               />
             </div>
+            {formik.touched.password && formik.errors.password && (
+              <small style={{ color: '#fb7185', fontSize: '0.8rem' }}>{formik.errors.password}</small>
+            )}
           </div>
 
           {mode === 'register' && (
@@ -183,13 +206,18 @@ export default function AuthPage({ showToast, setView }) {
                 <span className="auth-input-icon">🛡️</span>
                 <input
                   type="password"
+                  name="confirmPassword"
                   className="auth-text-input"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  value={formik.values.confirmPassword}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
                   placeholder="Nhập lại mật khẩu vừa nhập"
                   required
                 />
               </div>
+              {formik.touched.confirmPassword && formik.errors.confirmPassword && (
+                <small style={{ color: '#fb7185', fontSize: '0.8rem' }}>{formik.errors.confirmPassword}</small>
+              )}
             </div>
           )}
 
@@ -221,7 +249,7 @@ export default function AuthPage({ showToast, setView }) {
               <button
                 type="button"
                 className="link-switch-btn"
-                onClick={() => { sound.click(); setMode('register'); }}
+                onClick={() => { sound.click(); setMode('register'); formik.setErrors({}); }}
               >
                 Đăng ký ngay (Miễn phí)
               </button>
@@ -232,7 +260,7 @@ export default function AuthPage({ showToast, setView }) {
               <button
                 type="button"
                 className="link-switch-btn"
-                onClick={() => { sound.click(); setMode('login'); }}
+                onClick={() => { sound.click(); setMode('login'); formik.setErrors({}); }}
               >
                 Quay lại Đăng nhập
               </button>

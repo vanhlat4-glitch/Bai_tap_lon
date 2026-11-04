@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { sound } from '../utils/sound';
+import withAdminAuth from '../hoc/withAdminAuth';
 
-export default function AdminPage({ showToast }) {
+function AdminPage({ showToast }) {
   const { user } = useSelector(state => state.auth);
 
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'logins' | 'users' | 'scores' | 'purchases'
@@ -675,3 +676,5 @@ export default function AdminPage({ showToast }) {
     </div>
   );
 }
+
+export default withAdminAuth(AdminPage);

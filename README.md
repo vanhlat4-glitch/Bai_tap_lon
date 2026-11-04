@@ -20,8 +20,33 @@ Dự án website cổng Minigame trực tuyến hoàn chỉnh với đầy đủ
 | **Lesson 10 - Upload file** | Upload file với Multer, lưu trữ trên ổ đĩa, kiểm tra định dạng và kích thước | Cho phép người chơi tải ảnh đại diện từ máy tính (`/api/upload/avatar`), lưu vào `server/uploads/avatars/`. | `server/middlewares/uploadMiddleware.js`, `server/controllers/uploadController.js` |
 | **Lesson 11 - Data management** | Phân trang (Pagination), Tìm kiếm (Search), Sắp xếp (Sorting), Lọc (Filter), CRUD | Admin Panel hỗ trợ tìm kiếm theo tên người dùng, phân trang (trang trước/sau), xem chi tiết, sửa Xu và xóa tài khoản. | `server/controllers/userController.js`, `client/js/app.js` |
 | **Lesson 12 - Deployment** | Cấu hình biến môi trường production, scripts start, cấu trúc sẵn sàng deploy | Có sẵn file `.env.example`, package.json script `start: "node server/index.js"`, sẵn sàng deploy Render/Railway. | `package.json`, `.env.example` |
-| **Lesson 13 - Redux-toolkit / State Architecture** | Quản lý state tập trung, đồng bộ dữ liệu | Kiến trúc State Manager ở Front-end (`auth.js`, `api.js`, `sound.js`) quản lý trạng thái phiên đăng nhập, số dư Xu và kho đồ. | `client/js/auth.js`, `client/js/api.js` |
-| **Lesson 14 - Hoàn thiện dự án** | Tích hợp Front-end + Back-end mượt mà, UX/UI chỉn chu, tài liệu đầy đủ | Bộ 4 minigame (Caro AI, Snake 2.0, 2048, Lucky Wheel), giao diện Dark Neon, âm thanh Web Audio API. | Toàn bộ dự án |
+| **Lesson 13 - Redux-toolkit / State Architecture** | Quản lý state tập trung, đồng bộ dữ liệu | Kiến trúc Redux Toolkit (`store.js`, `authSlice.js`, `gamesSlice.js`, `shopSlice.js`) + Context API (`ThemeLanguageContext.jsx`). | `frontend/src/app/store.js`, `frontend/src/features/` |
+| **Lesson 14 - Hoàn thiện dự án** | Tích hợp Front-end + Back-end mượt mà, UX/UI chỉn chu, tài liệu đầy đủ | Bộ 4 minigame (Caro AI, Snake 2.0, 2048, Lucky Wheel), giao diện Dark/Light Neon, đa ngôn ngữ VI/EN, âm thanh Web Audio API. | Toàn bộ dự án |
+
+---
+
+## 🏆 BẢNG ĐỐI CHIẾU TIÊU CHÍ CHẤM ĐIỂM RUBRIC WEB (MỨC 4 - 7 - 10 ĐIỂM)
+
+### A. Phần Back-End (Node.js, Express.js & Database)
+
+| Tiêu chí Cơ bản (4đ) | Tiêu chí Trung bình (7đ) | Tiêu chí Nâng cao (10đ) | File minh chứng trong dự án |
+|:---|:---|:---|:---|
+| **Node.js & npm:** Cài đặt và sử dụng các gói npm (`express`, `mongoose`, `jsonwebtoken`, `bcryptjs`, `multer`, `dotenv`, `cors`). | **Tuyến đường nâng cao:** Xử lý `PUT`, `DELETE` và route params (`:id`), query params (`?page=&limit=&search=`). | **Tối ưu hóa hiệu năng:** Đánh Index CSDL (`idx_scores_game`, `idx_scores_user`, `idx_login_logs_time`), phân trang `LIMIT/OFFSET`. | `package.json`, `routes/userRoutes.js`, `controllers/userController.js`, `database/db.js` |
+| **Express.js cơ bản:** Khởi tạo và cấu hình ứng dụng Express, static files. | **Middleware phức tạp:** Auth JWT, Role guard (`admin`/`user`), Upload file Multer (kiểm tra MIME & size 5MB). | **Bảo mật ứng dụng:** JWT Access Token & Refresh Token, băm mật khẩu `bcryptjs` (salt 10 rounds), phân quyền RBAC. | `index.js`, `middlewares/`, `utils/token.js` |
+| **Routing cơ bản:** Xử lý yêu cầu `GET` và `POST`. | **Kết nối CSDL & CRUD:** Kết nối MongoDB Atlas (Mongoose) + SQLite Dual Engine, đầy đủ thao tác CRUD. | **Kiến trúc MVC & RESTful API:** Thiết kế chuẩn MVC (`models/`, `controllers/`, `routes/`, `middlewares/`). | `database/db.js`, `models/`, `controllers/`, `routes/` |
+| **Middleware cơ bản:** Phân tách rõ trách nhiệm giữa Middleware và Controller. | **Quản lý lỗi:** Xử lý lỗi tập trung và phản hồi HTTP status code chuẩn cho client. | **Mô tả API:** Tài liệu hóa API qua Postman Collection, `/api/health` và `README.md`. | `middlewares/errorMiddleware.js`, `minigame_api.postman_collection.json` |
+| **Thiết kế CSDL & Truy vấn:** Mô hình quan hệ 1-1 (`users` - `daily_wheel`), 1-N (`users` - `scores`), N-N (`users` - `items` qua `inventory`). | | | `database/db.js`, `models/User.js`, `models/Score.js`, `models/Inventory.js` |
+
+### B. Phần Front-End (React.js)
+
+| Tiêu chí Cơ bản (4đ) | Tiêu chí Trung bình (7đ) | Tiêu chí Nâng cao (10đ) | File minh chứng trong dự án |
+|:---|:---|:---|:---|
+| **Cài đặt dự án React:** Khởi tạo dự án React + Vite + Redux Toolkit. | **React Hooks (`useState`, `useEffect`):** Quản lý state và side effects trong toàn bộ functional components. | **Advanced Routing & Code Splitting:** Sử dụng `React.lazy()` và `<Suspense>` tách nhỏ bundle theo từng trang. | `frontend/src/App.jsx`, `frontend/package.json` |
+| **Component & JSX:** Xây dựng cấu trúc Functional Components & JSX rõ ràng. | **Context API:** Chia sẻ state toàn cục (Dark/Light Theme & Ngôn ngữ VI/EN) bằng `createContext` & `useContext`. | **State Persistence:** Lưu và khôi phục phiên đăng nhập, route hiện tại (`#hash` & `localStorage`), theme, ngôn ngữ. | `frontend/src/context/ThemeLanguageContext.jsx`, `frontend/src/App.jsx`, `frontend/src/features/auth/authSlice.js` |
+| **Components & Props:** Tạo Functional Components, Class Components và truyền dữ liệu qua `props`. | **Higher-Order Components (HOCs):** Xây dựng `withAdminAuth` bọc `AdminPage` để tái sử dụng logic kiểm tra quyền Admin. | **Class Component với Lifecycle:** Sử dụng `ErrorBoundary` và `StatBoxCard` với `shouldComponentUpdate`, `componentDidMount`, `componentDidCatch`. | `frontend/src/hoc/withAdminAuth.jsx`, `frontend/src/components/ErrorBoundary.jsx`, `frontend/src/pages/HomePage.jsx` |
+| **Xử lý sự kiện:** Xử lý `onClick`, `onChange`, `onSubmit`, bàn phím và cảm ứng (touch swipe). | **Optimization & Performance:** Tối ưu hóa render bằng `React.memo`, `useMemo` và `useCallback`. | | `frontend/src/pages/ShopPage.jsx`, `frontend/src/pages/LeaderboardPage.jsx` |
+| **Rendering Lists & Keys:** Sử dụng `.map()` và `key` duy nhất cho danh sách Bảng xếp hạng, Cửa hàng, Quản trị. | **Forms và Formik/Yup:** Quản lý và xác thực dữ liệu form Đăng nhập / Đăng ký bằng `useFormik` và `Yup.object()` schema. | | `frontend/src/components/AuthModal.jsx`, `frontend/src/pages/AuthPage.jsx` |
+| **Form & Controlled Components:** Liên kết `value` và `onChange` quản lý các input/select. | **Error Handling & Error Boundaries:** Bắt lỗi runtime trong cây component React với `ErrorBoundary` và khôi phục giao diện. | | `frontend/src/components/ErrorBoundary.jsx`, `frontend/src/App.jsx` |
 
 ---
 

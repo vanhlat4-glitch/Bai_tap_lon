@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchPlatformStats, fetchMatchHistory, setActiveGame } from '../features/games/gamesSlice';
 import { useThemeLang } from '../context/ThemeLanguageContext';
+import { StatBoxCard } from '../components/ErrorBoundary';
 import { sound } from '../utils/sound';
 
 export default function HomePage({ setView, openAuth }) {
@@ -64,36 +65,28 @@ export default function HomePage({ setView, openAuth }) {
         </div>
       </div>
 
-      {/* Stats Ribbon */}
+      {/* Stats Ribbon (Rendered via Class Component StatBoxCard with shouldComponentUpdate lifecycle) */}
       <div className="stats-ribbon">
-        <div className="stat-box">
-          <div className="stat-icon">👥</div>
-          <div className="stat-info">
-            <div className="stat-value">{Number(stats?.totalUsers || 5).toLocaleString(numberLocale)}</div>
-            <div className="stat-label">{t('stats.users')}</div>
-          </div>
-        </div>
-        <div className="stat-box">
-          <div className="stat-icon">🎮</div>
-          <div className="stat-info">
-            <div className="stat-value">{Number(stats?.totalMatches || 12).toLocaleString(numberLocale)}</div>
-            <div className="stat-label">{t('stats.matches')}</div>
-          </div>
-        </div>
-        <div className="stat-box">
-          <div className="stat-icon">🐍</div>
-          <div className="stat-info">
-            <div className="stat-value">{Number(stats?.records?.snake || 510).toLocaleString(numberLocale)}</div>
-            <div className="stat-label">{t('stats.snakeRecord')}</div>
-          </div>
-        </div>
-        <div className="stat-box">
-          <div className="stat-icon">💎</div>
-          <div className="stat-info">
-            <div className="stat-value">{Number(stats?.records?.game2048 || 35200).toLocaleString(numberLocale)}</div>
-            <div className="stat-label">{t('stats.game2048Record')}</div>
-          </div>
-        </div>
+        <StatBoxCard
+          icon="👥"
+          value={Number(stats?.totalUsers || 5).toLocaleString(numberLocale)}
+          label={t('stats.users')}
+        />
+        <StatBoxCard
+          icon="🎮"
+          value={Number(stats?.totalMatches || 12).toLocaleString(numberLocale)}
+          label={t('stats.matches')}
+        />
+        <StatBoxCard
+          icon="🐍"
+          value={Number(stats?.records?.snake || 510).toLocaleString(numberLocale)}
+          label={t('stats.snakeRecord')}
+        />
+        <StatBoxCard
+          icon="💎"
+          value={Number(stats?.records?.game2048 || 35200).toLocaleString(numberLocale)}
+          label={t('stats.game2048Record')}
+        />
       </div>
 
       {/* Game Cards Grid */}
