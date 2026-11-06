@@ -23,13 +23,17 @@ export default function WheelPage({ showToast, onPrizeWon, openAuth }) {
 
   const [isSpinning, setIsSpinning] = useState(false);
   const rotationRef = useRef(0);
+  const timerRef = useRef(null);
   const [costText, setCostText] = useState('');
   const [countdown, setCountdown] = useState('');
 
   useEffect(() => {
     drawWheel();
     checkCooldown();
-  }, [user, lang]);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [user?.username, lang]);
 
   const checkCooldown = async () => {
     if (!user) {
@@ -46,6 +50,7 @@ export default function WheelPage({ showToast, onPrizeWon, openAuth }) {
         setCostText(lang === 'vi' ? 'Lượt tiếp theo: 20 Xu' : 'Next spin: 20 Coins');
         startTimer(data.wheel.secondsUntilFreeSpin);
       } else {
+        if (timerRef.current) clearInterval(timerRef.current);
         setCostText(lang === 'vi' ? 'Lượt quay này: ✨ MIỄN PHÍ ✨' : 'This spin is: ✨ FREE ✨');
         setCountdown('');
       }
@@ -53,10 +58,11 @@ export default function WheelPage({ showToast, onPrizeWon, openAuth }) {
   };
 
   const startTimer = (seconds) => {
+    if (timerRef.current) clearInterval(timerRef.current);
     let rem = seconds;
-    const interval = setInterval(() => {
+    const tick = () => {
       if (rem <= 0) {
-        clearInterval(interval);
+        if (timerRef.current) clearInterval(timerRef.current);
         checkCooldown();
         return;
       }
@@ -69,7 +75,9 @@ export default function WheelPage({ showToast, onPrizeWon, openAuth }) {
           : `Next free spin in: ${h}h ${m}m ${s}s`
       );
       rem--;
-    }, 1000);
+    };
+    tick();
+    timerRef.current = setInterval(tick, 1000);
   };
 
   const drawWheel = () => {
@@ -181,6 +189,27 @@ export default function WheelPage({ showToast, onPrizeWon, openAuth }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
+
+      // Immediately deduct 20 coins on UI when starting a paid spin
+      if (!data.isFreeSpin && data.coinsSpent > 0) {
+        const afterDeduct = typeof data.coinsAfterDeduction === 'number'
+          ? data.coinsAfterDeduction
+          : Math.max(0, (user.coins || 0) - data.coinsSpent);
+        dispatch(updateCoins(afterDeduct));
+        showToast(
+          lang === 'vi'
+            ? `💸 Đã trừ ${data.coinsSpent} Xu phí quay thêm lượt!`
+            : `💸 Deducted ${data.coinsSpent} Coins for extra spin!`,
+          'info'
+        );
+      } else {
+        showToast(
+          lang === 'vi'
+            ? '✨ Sử dụng lượt quay MIỄN PHÍ (0 Xu)!'
+            : '✨ Using your FREE spin (0 Coins)!',
+          'info'
+        );
+      }
 
       const targetId = data.segmentId;
       const sliceAngle = (Math.PI * 2) / WHEEL_SEGMENTS.length;

@@ -221,7 +221,9 @@ exports.getMe = async (req, res, next) => {
     let canFreeSpin = true;
     let secondsUntilFreeSpin = 0;
     if (wheelStatus.last_free_spin) {
-      const last = new Date(wheelStatus.last_free_spin).getTime();
+      const rawTime = String(wheelStatus.last_free_spin);
+      const isoTime = rawTime.includes('T') ? rawTime : `${rawTime.replace(' ', 'T')}Z`;
+      const last = new Date(isoTime).getTime();
       const now = Date.now();
       const diffHours = (now - last) / (1000 * 60 * 60);
       if (diffHours < 6) {

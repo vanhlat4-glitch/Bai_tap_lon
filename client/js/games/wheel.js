@@ -147,6 +147,16 @@ class LuckyWheel {
       const res = await api.spinWheel();
       this.isSpinning = true;
 
+      if (!res.isFreeSpin && res.coinsSpent > 0 && auth.currentUser) {
+        auth.currentUser.coins = typeof res.coinsAfterDeduction === 'number'
+          ? res.coinsAfterDeduction
+          : Math.max(0, (auth.currentUser.coins || 0) - res.coinsSpent);
+        auth.updateUI();
+        showToast(`💸 Đã trừ ${res.coinsSpent} Xu phí quay thêm lượt!`, 'info');
+      } else {
+        showToast('✨ Sử dụng lượt quay MIỄN PHÍ (0 Xu)!', 'info');
+      }
+
       const targetSegmentId = res.segmentId;
       const numSegments = this.segments.length;
       const anglePerSegment = (Math.PI * 2) / numSegments;

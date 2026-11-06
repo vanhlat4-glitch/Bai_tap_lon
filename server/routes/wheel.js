@@ -38,7 +38,9 @@ router.post('/spin', authenticateToken, (req, res) => {
 
     let isFreeSpin = true;
     if (wheelRow.last_free_spin) {
-      const lastTime = new Date(wheelRow.last_free_spin).getTime();
+      const rawTime = String(wheelRow.last_free_spin);
+      const isoTime = rawTime.includes('T') ? rawTime : `${rawTime.replace(' ', 'T')}Z`;
+      const lastTime = new Date(isoTime).getTime();
       const now = Date.now();
       const diffHours = (now - lastTime) / (1000 * 60 * 60);
       if (diffHours < 6) {
@@ -57,6 +59,8 @@ router.post('/spin', authenticateToken, (req, res) => {
       }
       db.prepare('UPDATE users SET coins = coins - ? WHERE id = ?').run(SPIN_COST, userId);
     }
+
+    const coinsAfterDeduction = isFreeSpin ? user.coins : (user.coins - SPIN_COST);
 
     // Weighted random selection
     const totalWeight = WHEEL_SEGMENTS.reduce((sum, s) => sum + s.weight, 0);
@@ -84,9 +88,9 @@ router.post('/spin', authenticateToken, (req, res) => {
     if (isFreeSpin) {
       db.prepare(`
         UPDATE daily_wheel 
-        SET last_free_spin = datetime('now'), total_spins = total_spins + 1 
+        SET last_free_spin = ?, total_spins = total_spins + 1 
         WHERE user_id = ?
-      `).run(userId);
+      `).run(new Date().toISOString(), userId);
     } else {
       db.prepare('UPDATE daily_wheel SET total_spins = total_spins + 1 WHERE user_id = ?').run(userId);
     }
@@ -98,8 +102,11 @@ router.post('/spin', authenticateToken, (req, res) => {
       prize: selectedSegment,
       isFreeSpin,
       coinsSpent: isFreeSpin ? 0 : SPIN_COST,
+      coinsAfterDeduction,
       user: updatedUser,
-      message: `🎉 Bạn đã trúng: ${selectedSegment.label}!`
+      message: isFreeSpin
+        ? `🎉 (Lượt miễn phí) Bạn đã trúng: ${selectedSegment.label}!`
+        : `🎉 (Đã trừ ${SPIN_COST} Xu) Bạn đã trúng: ${selectedSegment.label}!`
     });
   } catch (err) {
     console.error('Wheel spin error:', err);
