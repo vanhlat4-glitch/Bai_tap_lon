@@ -228,17 +228,18 @@ html[data-theme="light"] {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
+  gap: 0.3rem;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid var(--border-color);
   color: var(--text-primary);
-  padding: 0.42rem 0.75rem;
+  padding: 0.35rem 0.55rem;
   border-radius: var(--radius-md);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
   transition: var(--transition);
   user-select: none;
+  flex-shrink: 0;
 }
 
 [data-theme="light"] .btn-icon {
@@ -260,25 +261,25 @@ html[data-theme="light"] {
 }
 
 .theme-toggle-btn {
-  font-size: 1.15rem;
-  padding: 0.38rem 0.65rem;
+  font-size: 1rem;
+  padding: 0.34rem 0.52rem;
 }
 
 .lang-toggle-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.35rem 0.7rem;
+  gap: 0.28rem;
+  padding: 0.34rem 0.55rem;
 }
 
 .lang-flag {
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   line-height: 1;
 }
 
 .lang-code {
   font-weight: 700;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   letter-spacing: 0.5px;
 }
 
@@ -375,46 +376,48 @@ body {
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   border-bottom: 1px solid var(--border-color);
-  padding: 0.75rem 0;
+  padding: 0.6rem 0;
   width: 100%;
 }
 
 .app-header .container {
   max-width: 100%;
-  padding: 0 1.75rem;
+  padding: 0 1rem;
 }
 
 .header-inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1.25rem;
+  gap: 0.5rem;
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .logo-area {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
   cursor: pointer;
   user-select: none;
   flex-shrink: 0;
 }
 
 .logo-icon {
-  font-size: 2rem;
+  font-size: 1.55rem;
   background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(139, 92, 246, 0.2));
   border: 1px solid var(--border-color);
-  padding: 0.25rem 0.5rem;
+  padding: 0.2rem 0.42rem;
   border-radius: var(--radius-md);
   box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
 }
 
 .logo-title {
   font-family: var(--font-heading);
-  font-size: 1.35rem;
+  font-size: 1.15rem;
   font-weight: 800;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
 }
 
 .logo-title .highlight {
@@ -424,8 +427,8 @@ body {
 
 .logo-subtitle {
   display: block;
-  font-size: 0.65rem;
-  letter-spacing: 2px;
+  font-size: 0.56rem;
+  letter-spacing: 1.4px;
   color: var(--text-muted);
   font-weight: 600;
 }
@@ -433,30 +436,38 @@ body {
 .main-nav {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.2rem;
   background: rgba(17, 24, 39, 0.7);
-  padding: 0.28rem 0.4rem;
+  padding: 0.22rem 0.3rem;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
-  flex-shrink: 0;
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.main-nav::-webkit-scrollbar {
+  display: none;
 }
 
 .nav-link {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.45rem 0.85rem;
+  gap: 0.3rem;
+  padding: 0.38rem 0.62rem;
   color: var(--text-secondary);
   background: transparent;
   border: 1px solid transparent;
   text-decoration: none;
-  font-size: 0.88rem;
+  font-size: 0.82rem;
   font-weight: 500;
   border-radius: var(--radius-sm);
   transition: var(--transition);
   white-space: nowrap;
   cursor: pointer;
   user-select: none;
+  flex-shrink: 0;
 }
 
 .nav-link:hover {
@@ -476,14 +487,15 @@ body {
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.38rem;
   flex-shrink: 0;
+  min-width: 0;
 }
 
 .auth-buttons {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   flex-shrink: 0;
 }
 
@@ -496,24 +508,28 @@ body {
 .user-pill {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.4rem;
   background: rgba(255, 255, 255, 0.04);
-  padding: 0.35rem 0.5rem 0.35rem 0.75rem;
+  padding: 0.25rem 0.38rem 0.25rem 0.5rem;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
+  flex-shrink: 0;
+  max-width: 100%;
 }
 
 .user-coin-badge {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.25rem;
   background: rgba(245, 158, 11, 0.15);
   border: 1px solid rgba(245, 158, 11, 0.3);
-  padding: 0.25rem 0.6rem;
+  padding: 0.2rem 0.45rem;
   border-radius: var(--radius-sm);
   font-weight: 700;
   color: var(--accent-gold);
-  font-size: 0.88rem;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .coin-pulse {
@@ -529,27 +545,76 @@ body {
 .user-info-badge {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.35rem;
+  min-width: 0;
 }
 
 .user-avatar-icon {
-  font-size: 1.35rem;
+  font-size: 1.15rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
 }
 
 .user-text-info {
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  line-height: 1.2;
 }
 
 .user-name {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 700;
+  max-width: 85px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .user-badge {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   color: var(--accent-cyan);
   font-weight: 600;
+  white-space: nowrap;
+}
+
+.user-action-btn {
+  padding: 0.26rem 0.42rem !important;
+  font-size: 0.85rem !important;
+  flex-shrink: 0;
+}
+
+.logout-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.26rem 0.5rem !important;
+  font-size: 0.78rem !important;
+  font-weight: 600;
+  background: rgba(244, 63, 94, 0.14);
+  border: 1px solid rgba(244, 63, 94, 0.35);
+  color: #fda4af;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.logout-pill-btn:hover {
+  background: rgba(244, 63, 94, 0.28);
+  border-color: rgba(244, 63, 94, 0.6);
+  color: #fff;
+}
+
+[data-theme="light"] .logout-pill-btn {
+  background: rgba(244, 63, 94, 0.1);
+  border-color: rgba(244, 63, 94, 0.3);
+  color: #e11d48;
+}
+
+[data-theme="light"] .logout-pill-btn:hover {
+  background: #e11d48;
+  color: #fff;
 }
 
 /* ==========================================================================
@@ -2033,7 +2098,29 @@ body {
 /* ==========================================================================
    Responsive Breakpoints
    ========================================================================== */
+@media (max-width: 1180px) {
+  .logo-subtitle {
+    display: none;
+  }
+  .logout-btn-text {
+    display: none;
+  }
+  .nav-link {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.78rem;
+  }
+}
+
 @media (max-width: 992px) {
+  .header-inner {
+    flex-wrap: wrap;
+    row-gap: 0.45rem;
+  }
+  .main-nav {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+  }
   .hero-card {
     grid-template-columns: 1fr;
     padding: 2.5rem 2rem;

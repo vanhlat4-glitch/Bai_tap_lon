@@ -137,8 +137,10 @@ export default function Navbar({ currentView, setView, openAuth, openUpload, sho
                   <span className="user-badge">{user.badge || (lang === 'vi' ? 'Tân thủ' : 'Novice')}</span>
                 </div>
               </div>
-              <button className="btn btn-ghost btn-sm" onClick={openUpload} title={t('nav.uploadAvatar')}>📷</button>
-              <button className="btn btn-ghost btn-sm" onClick={handleLogout} title={t('nav.logout')}>🚪</button>
+              <button className="btn btn-ghost btn-sm user-action-btn" onClick={openUpload} title={t('nav.uploadAvatar')}>📷</button>
+              <button className="btn btn-sm logout-pill-btn" onClick={handleLogout} title={t('nav.logout')}>
+                🚪 <span className="logout-btn-text">{lang === 'vi' ? 'Thoát' : 'Exit'}</span>
+              </button>
             </div>
           )}
         </div>
